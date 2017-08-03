@@ -101,5 +101,23 @@ def ecef2ned_matrix(ref_ecef):
 
     return M
 
+
 def wgsecef2ned(pos, ref):
     return np.matmul(ecef2ned_matrix(ref), pos)
+
+
+def wgsecef2azel(pos, ref):
+
+    # Calculate the vector from the reference point in the local North, East,
+    # Down frame of the reference point. */
+    ned = wgsecef2ned(pos-ref, pos, ref)
+
+    az = np.atan2(ned[1], ned[0])
+    # atan2 returns angle in range [-pi, pi], usually azimuth is defined in the
+    # range [0, 2pi]. */
+    if (az < 0):
+        az += 2*np.pi
+
+    el = np.asin(-ned[2]/np.linalg.norm(ned))
+
+    return az, el
