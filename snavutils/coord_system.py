@@ -62,3 +62,18 @@ def wgesecef2llh(ecef):
            ) / np.sqrt(e_c * e_c * C * C + S * S)
 
     return np.rad2deg(lat), np.rad2deg(lon), alt
+
+
+def wgsllh2ecef(llh):
+    lat, lon, alt = llh
+    lat, lon = np.deg2rad(lat), np.deg2rad(lon)
+
+    ecef = [None, None, None]
+    d = WGS84_E * np.sin(lat)
+    N = WGS84_A / np.sqrt(1. - d*d)
+
+    ecef[0] = (N + alt) * np.cos(lat) * np.cos(lon)
+    ecef[1] = (N + alt) * np.cos(lat) * np.sin(lon)
+    ecef[2] = ((1 - WGS84_E*WGS84_E)*N + alt) * np.sin(lat)
+
+    return ecef
