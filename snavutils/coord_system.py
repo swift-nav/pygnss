@@ -8,22 +8,24 @@ WGS84_B = (WGS84_A * (1 - WGS84_F))
 
 
 def wgsecef2llh(ecef):
-    lat, lon, alt = None, None, None
-    p = np.linalg.norm(ecef[:2])
+    x, y, z = ecef
 
-    if p != 0:
-        lon = np.arctan2(ecef[1], ecef[0])
-    else:
+    lat, lon, alt = None, None, None
+
+    p = np.linalg.norm((x, y))
+    if p == 0:
         lon = 0
+    else:
+        lon = np.arctan2(y, x)
 
     if p < WGS84_A * 1e-16:
-        lat = np.copysign(np.pi / 2, ecef[2])
-        alt = np.fabs(ecef[2]) - WGS84_B
+        lat = np.copysign(np.pi / 2, z)
+        alt = np.fabs(z) - WGS84_B
         return np.rad2deg(lat), np.rad2deg(lon), alt
 
     P = p / WGS84_A
     e_c = np.sqrt(1 - WGS84_E**2)
-    Z = np.fabs(ecef[2]) * e_c / WGS84_A
+    Z = np.fabs(z) * e_c / WGS84_A
 
     S = Z
     C = e_c * P
