@@ -1,3 +1,5 @@
+from functools import partial
+
 from hypothesis import given
 import hypothesis.strategies as st
 import pytest
@@ -19,19 +21,26 @@ test_data = [
     ((-90, 0, 22), (0, 0, -(EARTH_B + 22))),  # 22m above south pole
     ((0, 0, 22), (EARTH_A + 22, 0, 0)),  # 22m above the equator end prime meridian
     ((0, 180, 22), (-(EARTH_A + 22), 0, 0)),  # 22m above the equator
-    ((38, 122, 0), (-2666781.24337, 4267742.10516, 3905443.96842)),
+    ((38, 122, 0), (-2666781.2433701, 4267742.1051642, 3905443.968419)),
 ]
+
+approx_dist = partial(approx, abs=1e-6)
+approx_deg = partial(approx, abs=1e-7/3600)
+
+
+def llh_isclose(a, b):
+    assert a[:2] == approx_deg(a[:2])
+    assert a[2] == approx_dist(a[2])
 
 
 @pytest.mark.parametrize("ecef, expected", [(l, e) for e, l in test_data])
 def test_to_llh(ecef, expected):
-    lla = cs.wgsecef2llh(ecef)
-    assert lla == approx(expected, abs=1e-4)
+    llh_isclose(cs.wgsecef2llh(ecef), expected)
 
 
 @pytest.mark.parametrize("llh, expected", [(e, l) for e, l in test_data])
 def test_to_ecef(llh, expected):
-    assert cs.wgsllh2ecef(llh) == approx(expected, abs=1e-04)
+    assert cs.wgsllh2ecef(llh) == approx_dist(expected)
 
 
 lat_deg = st.floats(min_value=-90, max_value=90)
@@ -41,7 +50,7 @@ alt_m = st.floats(min_value=-0.5 * EARTH_A, max_value=4 * EARTH_A)
 
 @given(st.tuples(lat_deg, lon_deg, alt_m))
 def test_llh_ecef_roundtrip(x):
-    assert cs.wgsecef2llh(cs.wgsllh2ecef(x)) == approx(x, abs=1e-04)
+    llh_isclose(cs.wgsecef2llh(cs.wgsllh2ecef(x)), x)
 
 
 def test_ecef2ned():
