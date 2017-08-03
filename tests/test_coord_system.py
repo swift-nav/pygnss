@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from pytest import approx
 
-from snavutils.coord_system import wgesecef2llh, wgsllh2ecef
+from snavutils.coord_system import wgsecef2llh, wgsllh2ecef
 
 
 @pytest.mark.parametrize("ecef,expected",
@@ -10,7 +10,7 @@ from snavutils.coord_system import wgesecef2llh, wgsllh2ecef
                            [38., 122., 0.]),
                           ])
 def test_to_llh(ecef, expected):
-    lla = wgesecef2llh(ecef)
+    lla = wgsecef2llh(ecef)
     assert lla == approx(expected, abs=1e-4)
 
 

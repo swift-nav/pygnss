@@ -8,7 +8,7 @@ print(WGS84_E)
 WGS84_B = (WGS84_A * (1 - WGS84_F))
 
 
-def wgesecef2llh(ecef):
+def wgsecef2llh(ecef):
     # llh = [None, None, None]
     lat, lon, alt = None, None, None
     p = np.linalg.norm(ecef[:2])
