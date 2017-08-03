@@ -6,7 +6,10 @@ setup(
     setup_requires=['setuptools_scm'],
     install_requires=['numpy'],
     extras_require={
-        'test': ['pytest'],
+        'test': [
+            'pytest',
+            'hypothesis',
+        ],
     },
     packages=find_packages()
 )
