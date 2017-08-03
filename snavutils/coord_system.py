@@ -4,7 +4,6 @@ WGS84_A = 6378137.0
 WGS84_IF = 298.257223563
 WGS84_F = (1 / WGS84_IF)
 WGS84_E = np.sqrt(2 * WGS84_F - WGS84_F * WGS84_F)
-print(WGS84_E)
 WGS84_B = (WGS84_A * (1 - WGS84_F))
 
 
@@ -77,3 +76,30 @@ def wgsllh2ecef(llh):
     ecef[2] = ((1 - WGS84_E*WGS84_E)*N + alt) * np.sin(lat)
 
     return ecef
+
+
+def ecef2ned_matrix(ref_ecef):
+    M = np.empty([3, 3])
+    llh = np.empty([3])
+    llh = np.array(wgsecef2llh(ref_ecef))
+    llh[0], llh[1] = np.deg2rad(llh[0]), np.deg2rad(llh[1])
+
+    sin_lat = np.sin(llh[0])
+    cos_lat = np.cos(llh[0])
+    sin_lon = np.sin(llh[1])
+    cos_lon = np.cos(llh[1])
+
+    M[0][0] = -sin_lat * cos_lon
+    M[0][1] = -sin_lat * sin_lon
+    M[0][2] = cos_lat
+    M[1][0] = -sin_lon
+    M[1][1] = cos_lon
+    M[1][2] = 0.0
+    M[2][0] = -cos_lat * cos_lon
+    M[2][1] = -cos_lat * sin_lon
+    M[2][2] = -sin_lat
+
+    return M
+
+def wgsecef2ned(pos, ref):
+    return np.matmul(ecef2ned_matrix(ref), pos)
