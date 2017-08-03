@@ -53,6 +53,14 @@ def test_llh_ecef_roundtrip(x):
     llh_isclose(cs.wgsecef2llh(cs.wgsllh2ecef(x)), x)
 
 
+st_ecef = st.floats(min_value=-4*EARTH_A, max_value=4*EARTH_A)
+
+
+@given(st.tuples(st_ecef, st_ecef, st_ecef))
+def test_ecef_llh_roundtrip(x):
+    assert cs.wgsllh2ecef(cs.wgsecef2llh(x)) == approx_dist(x)
+
+
 def test_ecef2ned():
     assert cs.wgsecef2ned((1, 1, 1), (2, 2, 2)) == approx(
         [1.13204490e-01, 1.11022302e-16, -1.72834740e+00])
