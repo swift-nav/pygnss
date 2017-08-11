@@ -35,12 +35,12 @@ def llh_isclose(a, b):
 
 @pytest.mark.parametrize("ecef, expected", [(l, e) for e, l in test_data])
 def test_to_llh(ecef, expected):
-    llh_isclose(cs.wgsecef2llh(ecef), expected)
+    llh_isclose(cs.ecef2llh(ecef), expected)
 
 
 @pytest.mark.parametrize("llh, expected", [(e, l) for e, l in test_data])
 def test_to_ecef(llh, expected):
-    assert cs.wgsllh2ecef(llh) == approx_dist(expected)
+    assert cs.llh2ecef(llh) == approx_dist(expected)
 
 
 lat_deg = st.floats(min_value=-90, max_value=90)
@@ -50,7 +50,7 @@ alt_m = st.floats(min_value=-0.5 * EARTH_A, max_value=4 * EARTH_A)
 
 @given(st.tuples(lat_deg, lon_deg, alt_m))
 def test_llh_ecef_roundtrip(x):
-    llh_isclose(cs.wgsecef2llh(cs.wgsllh2ecef(x)), x)
+    llh_isclose(cs.ecef2llh(cs.llh2ecef(x)), x)
 
 
 st_ecef = st.floats(min_value=-4*EARTH_A, max_value=4*EARTH_A)
@@ -58,9 +58,9 @@ st_ecef = st.floats(min_value=-4*EARTH_A, max_value=4*EARTH_A)
 
 @given(st.tuples(st_ecef, st_ecef, st_ecef))
 def test_ecef_llh_roundtrip(x):
-    assert cs.wgsllh2ecef(cs.wgsecef2llh(x)) == approx_dist(x)
+    assert cs.llh2ecef(cs.ecef2llh(x)) == approx_dist(x)
 
 
 def test_ecef2ned():
-    assert cs.wgsecef2ned((1, 1, 1), (2, 2, 2)) == approx(
+    assert cs.ecef2ned((1, 1, 1), (2, 2, 2)) == approx(
         [1.13204490e-01, 1.11022302e-16, -1.72834740e+00])

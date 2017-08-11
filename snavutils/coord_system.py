@@ -7,7 +7,7 @@ WGS84_E = np.sqrt(2 * WGS84_F - WGS84_F * WGS84_F)
 WGS84_B = (WGS84_A * (1 - WGS84_F))
 
 
-def wgsecef2llh(ecef):
+def ecef2llh(ecef):
     x, y, z = ecef
 
     lat, lon, alt = None, None, None
@@ -63,7 +63,7 @@ def wgsecef2llh(ecef):
     return np.rad2deg(lat), np.rad2deg(lon), alt
 
 
-def wgsllh2ecef(llh):
+def llh2ecef(llh):
     lat, lon, alt = llh
     lat, lon = np.deg2rad(lat), np.deg2rad(lon)
 
@@ -80,7 +80,7 @@ def wgsllh2ecef(llh):
 def ecef2ned_matrix(ref_ecef):
     M = np.empty([3, 3])
     llh = np.empty([3])
-    llh = np.array(wgsecef2llh(ref_ecef))
+    llh = np.array(ecef2llh(ref_ecef))
     llh[0], llh[1] = np.deg2rad(llh[0]), np.deg2rad(llh[1])
 
     sin_lat = np.sin(llh[0])
@@ -101,18 +101,18 @@ def ecef2ned_matrix(ref_ecef):
     return M
 
 
-def wgsecef2ned(pos, ref):
+def ecef2ned(pos, ref):
     return np.matmul(ecef2ned_matrix(ref), pos)
 
-def wgsecef2ned_d(pos, ref):
-    return wgsecef2ned((pos-ref), ref)
+def ecef2ned_d(pos, ref):
+    return ecef2ned((pos-ref), ref)
 
 
-def wgsecef2azel(pos, ref):
+def ecef2azel(pos, ref):
 
     # Calculate the vector from the reference point in the local North, East,
     # Down frame of the reference point. */
-    ned = wgsecef2ned(pos-ref, pos, ref)
+    ned = ecef2ned(pos-ref, pos, ref)
 
     az = np.atan2(ned[1], ned[0])
     # atan2 returns angle in range [-pi, pi], usually azimuth is defined in the
