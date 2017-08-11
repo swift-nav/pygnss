@@ -104,6 +104,9 @@ def ecef2ned_matrix(ref_ecef):
 def wgsecef2ned(pos, ref):
     return np.matmul(ecef2ned_matrix(ref), pos)
 
+def wgsecef2ned_d(pos, ref):
+    return wgsecef2ned((pos-ref), ref)
+
 
 def wgsecef2azel(pos, ref):
 
