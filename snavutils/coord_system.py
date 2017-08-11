@@ -8,6 +8,8 @@ WGS84_B = (WGS84_A * (1 - WGS84_F))
 
 
 def ecef2llh(ecef):
+    """Convert cartesian ECEF coords to geodetic coordinates.
+    """
     x, y, z = ecef
 
     lat, lon, alt = None, None, None
@@ -64,6 +66,9 @@ def ecef2llh(ecef):
 
 
 def llh2ecef(llh):
+    """Convert geodetic LLH coordinates to ECEF coordinates.
+    """
+
     lat, lon, alt = llh
 
     d = WGS84_E * np.sin(lat)
