@@ -21,7 +21,7 @@ def ecef2llh(ecef):
     if p < WGS84_A * 1e-16:
         lat = np.copysign(np.pi / 2, z)
         alt = np.fabs(z) - WGS84_B
-        return np.rad2deg(lat), np.rad2deg(lon), alt
+        return lat, lon, alt
 
     P = p / WGS84_A
     e_c = np.sqrt(1 - WGS84_E**2)
@@ -60,12 +60,11 @@ def ecef2llh(ecef):
     alt = (p * e_c * C + np.fabs(ecef[2]) * S - WGS84_A * e_c * A_n
            ) / np.sqrt(e_c * e_c * C * C + S * S)
 
-    return np.rad2deg(lat), np.rad2deg(lon), alt
+    return lat, lon, alt
 
 
 def llh2ecef(llh):
     lat, lon, alt = llh
-    lat, lon = np.deg2rad(lat), np.deg2rad(lon)
 
     d = WGS84_E * np.sin(lat)
     N = WGS84_A / np.sqrt(1. - d*d)
@@ -81,7 +80,6 @@ def ecef2ned_matrix(ref_ecef):
     M = np.empty([3, 3])
     llh = np.empty([3])
     llh = np.array(ecef2llh(ref_ecef))
-    llh[0], llh[1] = np.deg2rad(llh[0]), np.deg2rad(llh[1])
 
     sin_lat = np.sin(llh[0])
     cos_lat = np.cos(llh[0])

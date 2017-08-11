@@ -1,5 +1,6 @@
 from functools import partial
 
+import numpy as np
 from hypothesis import given
 import hypothesis.strategies as st
 import pytest
@@ -10,6 +11,7 @@ import snavutils.coord_system as cs
 EARTH_A = 6378137.0
 EARTH_B = 6356752.31424517929553985595703125
 
+# (lat_deg, lon_deg, alt_m), (x_m, y_m, z_m)
 test_data = [
     ((0, 0, 0), (EARTH_A, 0, 0)),  # On the Equator and Prime Meridian
     ((0, 180, 0), (-EARTH_A, 0, 0)),  # On the Equator
@@ -23,9 +25,11 @@ test_data = [
     ((0, 180, 22), (-(EARTH_A + 22), 0, 0)),  # 22m above the equator
     ((38, 122, 0), (-2666781.2433701, 4267742.1051642, 3905443.968419)),
 ]
+test_data = [((np.deg2rad(la), np.deg2rad(lo), hi), ecef) for ((la, lo, hi), ecef) in test_data]
+print(test_data)
 
 approx_dist = partial(approx, abs=1e-6)
-approx_deg = partial(approx, abs=1e-7/3600)
+approx_deg = partial(approx, abs=np.deg2rad(1e-7/3600))
 
 
 def llh_isclose(a, b):
@@ -43,12 +47,12 @@ def test_to_ecef(llh, expected):
     assert cs.llh2ecef(llh) == approx_dist(expected)
 
 
-lat_deg = st.floats(min_value=-90, max_value=90)
-lon_deg = st.floats(min_value=-180, max_value=180)
+lat_rad = st.floats(min_value=np.deg2rad(-90), max_value=np.deg2rad(90))
+lon_rad = st.floats(min_value=np.deg2rad(-180), max_value=np.deg2rad(180))
 alt_m = st.floats(min_value=-0.5 * EARTH_A, max_value=4 * EARTH_A)
 
 
-@given(st.tuples(lat_deg, lon_deg, alt_m))
+@given(st.tuples(lat_rad, lon_rad, alt_m))
 def test_llh_ecef_roundtrip(x):
     llh_isclose(cs.ecef2llh(cs.llh2ecef(x)), x)
 
