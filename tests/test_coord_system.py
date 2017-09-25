@@ -6,7 +6,7 @@ import hypothesis.strategies as st
 import pytest
 from pytest import approx
 
-import snavutils.coord_system as cs
+import gnss.coord_system as cs
 
 EARTH_A = 6378137.0
 EARTH_B = 6356752.31424517929553985595703125

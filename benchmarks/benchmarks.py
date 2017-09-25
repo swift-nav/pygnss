@@ -1,4 +1,4 @@
-import snavutils.coord_system as cs
+import gnss.coord_system as cs
 
 class TimeSuite:
     """

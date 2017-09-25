@@ -4,10 +4,10 @@
     "version": 1,
 
     // The name of the project being benchmarked
-    "project": "snavutils",
+    "project": "gnss",
 
     // The project's homepage
-    "project_url": "https://github.com/swift-nav/snavutils",
+    "project_url": "https://github.com/swift-nav/python-gnss",
 
     // The URL or local path of the source code repository for the
     // project being benchmarked
