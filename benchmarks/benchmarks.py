@@ -9,5 +9,4 @@ class TimeSuite:
         self.a = (38., 122., 0.)
 
     def time_to_ecef(self):
-        cs.wgsllh2ecef(self.a)
-
+        cs.ecef_from_llh(self.a)

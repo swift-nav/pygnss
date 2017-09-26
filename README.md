@@ -15,10 +15,10 @@ To install the latest version of `pygnss` from git:
 ## Usage
 
 Currently, `pygnss` provides functions for the following coordinate transformations:
-* ecef2llh
-* llh2ecef
-* ecef2ned
-* ecef2azel
+* `llh_from_ecef`
+* `ecef_from_llh`
+* `ned_from_ecef`
+* `azel_from_ecef`
 
 
 ## License

@@ -39,12 +39,12 @@ def llh_isclose(a, b):
 
 @pytest.mark.parametrize("ecef, expected", [(l, e) for e, l in test_data])
 def test_to_llh(ecef, expected):
-    llh_isclose(cs.ecef2llh(ecef), expected)
+    llh_isclose(cs.llh_from_ecef(ecef), expected)
 
 
 @pytest.mark.parametrize("llh, expected", [(e, l) for e, l in test_data])
 def test_to_ecef(llh, expected):
-    assert cs.llh2ecef(llh) == approx_dist(expected)
+    assert cs.ecef_from_llh(llh) == approx_dist(expected)
 
 
 lat_rad = st.floats(min_value=np.deg2rad(-90), max_value=np.deg2rad(90))
@@ -54,7 +54,7 @@ alt_m = st.floats(min_value=-0.5 * EARTH_A, max_value=4 * EARTH_A)
 
 @given(st.tuples(lat_rad, lon_rad, alt_m))
 def test_llh_ecef_roundtrip(x):
-    llh_isclose(cs.ecef2llh(cs.llh2ecef(x)), x)
+    llh_isclose(cs.llh_from_ecef(cs.ecef_from_llh(x)), x)
 
 
 # generate coordinates outside a 800km sphere from the center of the earth
@@ -64,9 +64,9 @@ st_ecef = st.floats(min_value=800*1000, max_value=4*EARTH_A) | st.floats(
 
 @given(st.tuples(st_ecef, st_ecef, st_ecef))
 def test_ecef_llh_roundtrip(x):
-    assert cs.llh2ecef(cs.ecef2llh(x)) == approx_dist(x)
+    assert cs.ecef_from_llh(cs.llh_from_ecef(x)) == approx_dist(x)
 
 
-def test_ecef2ned():
-    assert cs.ecef2ned((1, 1, 1), (2, 2, 2)) == approx(
+def test_ned_from_ecef():
+    assert cs.ned_from_ecef((1, 1, 1), (2, 2, 2)) == approx(
         [1.13204490e-01, 1.11022302e-16, -1.72834740e+00])

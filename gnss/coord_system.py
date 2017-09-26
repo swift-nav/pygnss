@@ -13,7 +13,7 @@ WGS84_E = np.sqrt(2 * WGS84_F - WGS84_F * WGS84_F)
 WGS84_B = (WGS84_A * (1 - WGS84_F))
 
 
-def ecef2llh(ecef):
+def llh_from_ecef(ecef):
     """Convert cartesian ECEF coords to geodetic coordinates.
 
      Converts from WGS84 Earth Centered, Earth Fixed (ECEF) Cartesian
@@ -130,7 +130,7 @@ def ecef2llh(ecef):
     return lat, lon, alt
 
 
-def llh2ecef(llh):
+def ecef_from_llh(llh):
     """Convert geodetic LLH coordinates to ECEF coordinates.
 
     Converts from WGS84 geodetic coordinates (latitude, longitude and height)
@@ -157,7 +157,7 @@ def ecef2ned_matrix(ref_ecef):
     """
     M = np.empty([3, 3])
     llh = np.empty([3])
-    llh = np.array(ecef2llh(ref_ecef))
+    llh = np.array(llh_from_ecef(ref_ecef))
 
     sin_lat = np.sin(llh[0])
     cos_lat = np.cos(llh[0])
@@ -177,7 +177,7 @@ def ecef2ned_matrix(ref_ecef):
     return M
 
 
-def ecef2ned(pos, ref):
+def ned_from_ecef(pos, ref):
     """Convert ECEF coordinates into NED frame of given reference.
     """
     return np.matmul(ecef2ned_matrix(ref), pos)
@@ -187,15 +187,15 @@ def ecef2ned_d(pos, ref):
     """Returns the vector between two ECEF points in the NED frame of the
     reference
     """
-    return ecef2ned((pos - ref), ref)
+    return ned_from_ecef((pos - ref), ref)
 
 
-def ecef2azel(pos, ref):
+def azel_from_ecef(pos, ref):
     """Returns the azimuth and elevation between two ECEF points"""
 
     # Calculate the vector from the reference point in the local North, East,
     # Down frame of the reference point. */
-    ned = ecef2ned(pos - ref, pos, ref)
+    ned = ned_from_ecef(pos - ref, pos, ref)
 
     az = np.atan2(ned[1], ned[0])
     # atan2 returns angle in range [-pi, pi], usually azimuth is defined in the
