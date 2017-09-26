@@ -57,7 +57,9 @@ def test_llh_ecef_roundtrip(x):
     llh_isclose(cs.ecef2llh(cs.llh2ecef(x)), x)
 
 
-st_ecef = st.floats(min_value=-4*EARTH_A, max_value=4*EARTH_A)
+# generate coordinates outside a 800km sphere from the center of the earth
+st_ecef = st.floats(min_value=800*1000, max_value=4*EARTH_A) | st.floats(
+    min_value=-4*EARTH_A, max_value=800*1000)
 
 
 @given(st.tuples(st_ecef, st_ecef, st_ecef))
