@@ -1,20 +1,20 @@
-# GNSS
+# PyGNSS
 
-`GNSS` is a Python library which which provides various GNSS related utilites. `GNSS` runs on both Python 2 and 3. The coordinate system transformations are implemented based on the algorithms used by `libswiftnav`.
+`PyGNSS` is a Python library which which provides various GNSS related utilites. `PyGNSS` runs on both Python 2 and 3. The coordinate system transformations are implemented based on the algorithms used by `libswiftnav`.
 
 
 ## Installation 
 
-It is recommended to install `gnss` in a virtualenv to avoid polluting global system state.
+It is recommended to install `pygnss` in a virtualenv to avoid polluting global system state.
 
-To install the latest version of `gnss` from git:
+To install the latest version of `pygnss` from git:
 
-` $ pip install 'git+https://github.com/swift-nav/python-gnss.git'`
+` $ pip install 'git+https://github.com/swift-nav/pygnss.git'`
 
 
 ## Usage
 
-Currently, `gnss` provides functions for the following coordinate transformations:
+Currently, `pygnss` provides functions for the following coordinate transformations:
 * ecef2llh
 * llh2ecef
 * ecef2ned

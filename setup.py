@@ -5,7 +5,7 @@ setup(
     description='GNSS Utilities',
     author='Swift Navigation',
     author_email='dev@swiftnav.com',
-    url='https://github.com/swift-nav/python-gnss',
+    url='https://github.com/swift-nav/pygnss',
     packages=find_packages(),
     use_scm_version=True,
     setup_requires=['setuptools_scm'],
