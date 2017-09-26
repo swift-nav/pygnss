@@ -1,5 +1,7 @@
 # PyGNSS
 
+[![Build Status](https://travis-ci.org/swift-nav/pygnss.svg?branch=master)](https://travis-ci.org/swift-nav/pygnss)
+
 `PyGNSS` is a Python library which which provides various GNSS related utilites. `PyGNSS` runs on both Python 2 and 3. The coordinate system transformations are implemented based on the algorithms used by `libswiftnav`.
 
 
