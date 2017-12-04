@@ -1,15 +1,17 @@
-from functools import partial
-
-import numpy as np
-from hypothesis import given
-import hypothesis.strategies as st
 import pytest
+import numpy as np
+
+import hypothesis.strategies as st
+
 from pytest import approx
+from hypothesis import given
+from functools import partial
 
 import gnss.coord_system as cs
 
 EARTH_A = 6378137.0
 EARTH_B = 6356752.31424517929553985595703125
+SAT_ALTITUDE = 20000000
 
 # (lat_deg, lon_deg, alt_m), (x_m, y_m, z_m)
 test_data = [
@@ -25,8 +27,6 @@ test_data = [
     ((0, 180, 22), (-(EARTH_A + 22), 0, 0)),  # 22m above the equator
     ((38, 122, 0), (-2666781.2433701, 4267742.1051642, 3905443.968419)),
 ]
-test_data = [((np.deg2rad(la), np.deg2rad(lo), hi), ecef) for ((la, lo, hi), ecef) in test_data]
-print(test_data)
 
 approx_dist = partial(approx, abs=1e-6)
 approx_deg = partial(approx, abs=np.deg2rad(1e-7/3600))
@@ -67,6 +67,42 @@ def test_ecef_llh_roundtrip(x):
     assert cs.ecef_from_llh(cs.llh_from_ecef(x)) == approx_dist(x)
 
 
-def test_ned_from_ecef():
-    assert cs.ned_from_ecef((1, 1, 1), (2, 2, 2)) == approx(
-        [1.13204490e-01, 1.11022302e-16, -1.72834740e+00])
+@pytest.mark.parametrize("vector,reference,expected",
+                         # this vector should be directly above the reference point so
+                         # we expect the north and east components to be zero and the down
+                         # component to be -1.
+                         [((1., 0, 0), (EARTH_A, 0, 0), (0., 0., -1.)),
+                          # Here the vector should be pointing due east, there may be
+                          # some second order error which translate into the down
+                          # component, hence the small magnitude.
+                          ((0., 0.01, 0.), (EARTH_A, 0, 0), (0., 0.01, 0)),
+                          # Here the vector should be pointing due east, there may be
+                          # some second order error which translate into the down
+                          # component, hence the small magnitude.
+                          ((0., 0., 0.01), (EARTH_A, 0, 0), (0.01, 0., 0.)),
+                         ])
+def test_ned_from_ecef(vector, reference, expected):
+    actual = cs.ned_from_ecef(vector, reference)
+    assert actual == approx(expected)
+
+
+@pytest.mark.parametrize("target,reference,expected",
+                         # Here we place a target directly above the reference in
+                         # which case the elevation should be 90
+                         [((EARTH_A + SAT_ALTITUDE, 0, 0), (EARTH_A, 0, 0), (0., 90.)),
+                          # Satellite is directly East of the reference
+                          ((EARTH_A, SAT_ALTITUDE, 0), (EARTH_A, 0, 0), (90., 0.)),
+                          # Satellite is directly North of the reference
+                          ((EARTH_A, 0, SAT_ALTITUDE), (EARTH_A, 0, 0), (0., 0.)),
+                          # Satellite is east at elevation angle of 45.
+                          ((EARTH_A + SAT_ALTITUDE, 0, SAT_ALTITUDE), (EARTH_A, 0, 0), (0., 45.)),
+                          # Satellite is north east at elevation angle of tan^-1(1, sqrt(2))
+                          ((EARTH_A + SAT_ALTITUDE, SAT_ALTITUDE, SAT_ALTITUDE),
+                           (EARTH_A, 0, 0),
+                           (45., np.rad2deg(np.arctan2(1., np.sqrt(2))))),
+                         ])
+def test_azimuth_elevation_from_ecef(target, reference, expected):
+    azimuth, elevation = cs.azimuth_elevation_from_ecef(target, reference)
+    assert azimuth == approx(expected[0])
+    assert elevation == approx(expected[1])
+    

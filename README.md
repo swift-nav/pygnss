@@ -20,7 +20,7 @@ Currently, `pygnss` provides functions for the following coordinate transformati
 * `llh_from_ecef`
 * `ecef_from_llh`
 * `ned_from_ecef`
-* `azel_from_ecef`
+* `azimuth_elevation_from_ecef`
 
 
 ## License
