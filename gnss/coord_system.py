@@ -190,19 +190,21 @@ def relative_position_in_ned(ecef_target, ecef_reference):
 
     Parameters
     ----------
-    ecef_target : np.array
+    ecef_target : array-like length 3
         A length three vector which corresponds to the target position,
         or end point of the desired vector in ECEF frame.
-    ecef_reference : np.array
+    ecef_reference : array-like length 3
         A length three vector which corresponds to the reference position,
         or the starting point of the desired vector.
 
     Returns
     -------
-    ned : np.array
+    ned : array-like
         A length three vector which points from reference to target in the
         north/east/down reference frame centered at the reference position.
     """
+    ecef_target = np.asarray(ecef_target)
+    ecef_reference = np.asarray(ecef_reference)
     return ned_from_ecef((ecef_target - ecef_reference), ecef_reference)
 
 
@@ -212,10 +214,10 @@ def azimuth_elevation_from_ecef(ecef_target, ecef_reference):
 
     Parameters
     ----------
-    pos : np.array length 3
+    pos : array-like length 3
         The position in ECEF of the end point of the vector.  Typically
         this would be the location of a satellite.
-    ref : np.array length 3
+    ref : array-like length 3
         The reference position in ECEF, or the start of the vector.  Typically
         this would be the location of the receiver.
 
