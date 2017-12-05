@@ -35,7 +35,7 @@ def llh_from_ecef(ecef):
          Transformations", Burtch R. R. (2006), American Congress for Surveying
          and Mapping Annual Conference. Orlando, Florida.
       -# "Transformation from Cartesian to Geodetic Coordinates Accelerated by
-         Halley’s Method", T. Fukushima (2006), Journal of Geodesy.
+         Halleys Method", T. Fukushima (2006), Journal of Geodesy.
     """
 
     x, y, z = ecef
@@ -127,7 +127,7 @@ def llh_from_ecef(ecef):
     alt = (p * e_c * C + np.fabs(ecef[2]) * S - WGS84_A * e_c * A_n
            ) / np.sqrt(e_c * e_c * C * C + S * S)
 
-    return lat, lon, alt
+    return np.rad2deg(lat), np.rad2deg(lon), alt
 
 
 def ecef_from_llh(llh):
@@ -139,6 +139,8 @@ def ecef_from_llh(llh):
     """
 
     lat, lon, alt = llh
+    lat = np.deg2rad(lat)
+    lon = np.deg2rad(lon)
 
     d = WGS84_E * np.sin(lat)
     N = WGS84_A / np.sqrt(1. - d * d)
@@ -150,13 +152,12 @@ def ecef_from_llh(llh):
     return x, y, z
 
 
-def ecef2ned_matrix(ref_ecef):
+def ecef_to_ned_matrix(ref_ecef):
     """Populates a provided 3x3 matrix with the appropriate rotation
     matrix to transform from ECEF to NED coordinates, given the
     provided ECEF reference vector.
     """
     M = np.empty([3, 3])
-    llh = np.empty([3])
     llh = np.array(llh_from_ecef(ref_ecef))
 
     sin_lat = np.sin(llh[0])
@@ -177,32 +178,67 @@ def ecef2ned_matrix(ref_ecef):
     return M
 
 
-def ned_from_ecef(pos, ref):
+def ned_from_ecef(ecef_vector, reference_location):
     """Convert ECEF coordinates into NED frame of given reference.
     """
-    return np.matmul(ecef2ned_matrix(ref), pos)
+    return np.dot(ecef_to_ned_matrix(reference_location), ecef_vector)
 
 
-def ecef2ned_d(pos, ref):
+def relative_position_in_ned(ecef_target, ecef_reference):
     """Returns the vector between two ECEF points in the NED frame of the
-    reference
+    reference.
+
+    Parameters
+    ----------
+    ecef_target : array-like length 3
+        A length three vector which corresponds to the target position,
+        or end point of the desired vector in ECEF frame.
+    ecef_reference : array-like length 3
+        A length three vector which corresponds to the reference position,
+        or the starting point of the desired vector.
+
+    Returns
+    -------
+    ned : array-like
+        A length three vector which points from reference to target in the
+        north/east/down reference frame centered at the reference position.
     """
-    return ned_from_ecef((pos - ref), ref)
+    ecef_target = np.asarray(ecef_target)
+    ecef_reference = np.asarray(ecef_reference)
+    return ned_from_ecef((ecef_target - ecef_reference), ecef_reference)
 
 
-def azel_from_ecef(pos, ref):
-    """Returns the azimuth and elevation between two ECEF points"""
+def azimuth_elevation_from_ecef(ecef_target, ecef_reference):
+    """Returns the azimuth and elevation of a vector pointing from `ref_position`
+    to `position` where both are given in ECEF
 
+    Parameters
+    ----------
+    pos : array-like length 3
+        The position in ECEF of the end point of the vector.  Typically
+        this would be the location of a satellite.
+    ref : array-like length 3
+        The reference position in ECEF, or the start of the vector.  Typically
+        this would be the location of the receiver.
+
+    Returns
+    -------
+    azimuth : float
+        The azimuth, or the angle between a horizontal projection of the vector
+        pointing from `reference position` to `position` and the vector pointing
+        due north (degrees)
+    elevation : float
+        The elevation angle, or the angle between the horizon at the `reference
+        position` and the object at `position` (degrees)
+    """
+    ecef_target = np.asarray(ecef_target)
+    ecef_reference = np.asarray(ecef_reference)
     # Calculate the vector from the reference point in the local North, East,
     # Down frame of the reference point. */
-    ned = ned_from_ecef(pos - ref, pos, ref)
-
-    az = np.atan2(ned[1], ned[0])
+    ned = relative_position_in_ned(ecef_target, ecef_reference)
     # atan2 returns angle in range [-pi, pi], usually azimuth is defined in the
     # range [0, 2pi]. */
-    if (az < 0):
-        az += 2 * np.pi
+    azimuth = np.mod(np.arctan2(ned[1], ned[0]), 2 * np.pi)
+    elevation = np.arcsin(-ned[2] / np.linalg.norm(ned))
 
-    el = np.asin(-ned[2] / np.linalg.norm(ned))
-
-    return az, el
+    return np.rad2deg(azimuth), np.rad2deg(elevation)
