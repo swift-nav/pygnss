@@ -181,10 +181,13 @@ def ecef_to_ned_matrix(ref_ecef):
     M = np.empty([3, 3])
     llh = np.array(llh_from_ecef(ref_ecef))
 
-    sin_lat = np.sin(llh[0])
-    cos_lat = np.cos(llh[0])
-    sin_lon = np.sin(llh[1])
-    cos_lon = np.cos(llh[1])
+    lat_radians = np.deg2rad(llh[0])
+    lon_radians = np.deg2rad(llh[1])
+
+    sin_lat = np.sin(lat_radians)
+    cos_lat = np.cos(lat_radians)
+    sin_lon = np.sin(lon_radians)
+    cos_lon = np.cos(lon_radians)
 
     M[0][0] = -sin_lat * cos_lon
     M[0][1] = -sin_lat * sin_lon

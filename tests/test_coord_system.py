@@ -80,6 +80,8 @@ def test_ecef_llh_roundtrip(x):
                           # some second order error which translate into the down
                           # component, hence the small magnitude.
                           ((0., 0., 0.01), (EARTH_A, 0, 0), (0.01, 0., 0.)),
+                          # Now try a spot check with angles
+                          ((1, 1, 1), (2, 2, 2), (1.13204490e-01, 1.11022302e-16, -1.72834740e+00))
                          ])
 def test_ned_from_ecef(vector, reference, expected):
     actual = cs.ned_from_ecef(vector, reference)
