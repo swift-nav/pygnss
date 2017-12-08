@@ -16,27 +16,38 @@ WGS84_B = (WGS84_A * (1 - WGS84_F))
 def llh_from_ecef(ecef):
     """Convert cartesian ECEF coords to geodetic coordinates.
 
-     Converts from WGS84 Earth Centered, Earth Fixed (ECEF) Cartesian
+    Converts from WGS84 Earth Centered, Earth Fixed (ECEF) Cartesian
     coordinates (X, Y and Z) into WGS84 geodetic coordinates (latitude,
     longitude and height).
 
-    Conversion from Cartesian to geodetic coordinates is a much harder problem
-    than conversion from geodetic to Cartesian. There is no satisfactory closed
-    form solution but many different iterative approaches exist.
 
-    Here we implement a relatively new algorithm due to Fukushima (2006) that
-    is very computationally efficient, not requiring any transcendental 
-    function calls during iteration and very few divisions. It also exhibits
-    cubic convergence rates compared to the quadratic rate of convergence seen
-    with the more common algortihms based on the Newton-Raphson method.
+    Parameters
+    ----------
+    ecef : array_like length 3
+        Coordinates in ECEF
 
-    References:
-      -# "A comparison of methods used in rectangular to Geodetic Coordinates
-         Transformations", Burtch R. R. (2006), American Congress for Surveying
-         and Mapping Annual Conference. Orlando, Florida.
-      -# "Transformation from Cartesian to Geodetic Coordinates Accelerated by
-         Halleys Method", T. Fukushima (2006), Journal of Geodesy.
+    Returns
+    -------
+    llh : array_like length 3
+        (Latitude(Degrees), Longitude(Degrees), Height(m))
     """
+
+    # Conversion from Cartesian to geodetic coordinates is a much harder
+    # problem than conversion from geodetic to Cartesian. There is no
+    # satisfactory closed form solution but many different iterative approaches
+    # exist.
+
+    # Here we implement a relatively new algorithm due to Fukushima (2006) that
+    # is very computationally efficient, not requiring any transcendental
+    # function calls during iteration and very few divisions. It also exhibits
+    # cubic convergence rates compared to the quadratic rate of convergence
+    # seen with the more common algortihms based on the Newton-Raphson method.
+
+    # References: -# "A comparison of methods used in rectangular to Geodetic
+    # Coordinates Transformations", Burtch R. R. (2006), American Congress for
+    # Surveying and Mapping Annual Conference. Orlando, Florida.  -#
+    # "Transformation from Cartesian to Geodetic Coordinates Accelerated by
+    # Halleys Method", T. Fukushima (2006), Journal of Geodesy.
 
     x, y, z = ecef
 
@@ -136,6 +147,16 @@ def ecef_from_llh(llh):
     Converts from WGS84 geodetic coordinates (latitude, longitude and height)
     into WGS84 Earth Centered, Earth Fixed Cartesian (ECEF) coordinates
     (X, Y and Z).
+
+    Parameters
+    ----------
+    llh : array_like length 3
+        (Latitude(Degrees), Longitude(Degrees), Height(m))
+
+    Returns
+    -------
+    ecef : array_like length 3
+        Coordinates in ECEF
     """
 
     lat, lon, alt = llh
