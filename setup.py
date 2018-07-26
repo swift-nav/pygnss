@@ -9,7 +9,7 @@ setup(
     packages=find_packages(),
     use_scm_version=True,
     setup_requires=['setuptools_scm'],
-    install_requires=['numpy'],
+    install_requires=['numpy', 'pandas'],
     extras_require={
         'test': [
             'pytest',
