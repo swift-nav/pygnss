@@ -10,94 +10,6 @@ WEEK_SECS = 7 * 24 * 60 * 60
 GPS_WEEK_0 = np.datetime64('1980-01-06T00:00:00Z', 'ns')
 
 
-def timedelta_from_seconds(seconds):
-    """
-    Converts from floating point number of seconds to a np.timedelta64.
-    The number of seconds will be rounded to the nearest nanosecond.
-
-    Note that nanosecond precision is not sufficient for some GPS
-    applications.  For example, computing a range from time of
-    flight with nanosecond precision would result in +/- 30 cm of
-    error which is likely unsatisfactory.
-
-    Parameters
-    ----------
-    sec : float
-      A floating point representation of the number of seconds
-
-    Returns
-    -----------
-    td : np.timedelta64
-      A timedelta64[ns] object (or array like of them)
-    """
-    seconds = np.array(seconds)
-    return np.round(seconds * 1e9).astype('timedelta64[ns]')
-
-
-def seconds_from_timedelta(td):
-    """
-    Converts a np.timedelta64 object into a float number of seconds.
-    The resulting number of seconds will be accurate to nanoseconds.
-
-    Note that nanosecond precision is not sufficient for some GPS
-    applications.  For example, computing a range from time of
-    flight with nanosecond precision would result in +/- 30 cm of
-    error which is likely unsatisfactory.
-
-    Parameters
-    ----------
-    td : np.timedelta64
-      A timedelta64 object (or array like of them)
-
-    Returns
-    -----------
-    sec : float
-      The floating point representation of the number of seconds
-      in the time delta.
-    """
-    # make sure td is a np.timdelta64 object
-    assert td.dtype.kind == 'm'
-    seconds = td / np.timedelta64(1, 's')
-    # This may seem out of order, but we first create
-    # the seconds variable so it preserves the type of td,
-    # then we convert td to a numpy array for the NaT
-    # comparison.
-    #
-    # We have to do the conversion because datetime handling in
-    # pandas/numpy is totally whack, and very inconsistent.
-    # For example:
-    #
-    #   > tmp
-    #   sid
-    #   0   NaT
-    #   2   NaT
-    #   Name: time, dtype: timedelta64[ns]
-    #
-    #   > tmp == np.timedelta64('NaT', 'ns')
-    #   sid
-    #   0    False
-    #   2    False
-    #   Name: time, dtype: bool
-    #
-    #   > tmp.values == np.timedelta64('NaT', 'ns')
-    #   array([ True,  True], dtype=bool)
-    #   tmp.values == np.timedelta64('NaT')
-    #   False
-
-    # As shown above comparison only works if tmp is
-    # a numpy array, this will convert things like pandas
-    # Series to numpy arrays
-    td = np.asarray(td)
-    # now do the NaT comparison
-    is_nat = td == np.timedelta64('NaT', 'ns')
-    # and fill in the NaT values with NaN values.
-    if td.size == 1 and is_nat:
-        seconds = np.nan
-    elif np.any(is_nat):
-        seconds[is_nat] = np.nan
-    return seconds
-
-
 def gps_format_to_datetime(wn, tow):
     """
     Converts a time using week number and time of week representation
@@ -123,11 +35,9 @@ def gps_format_to_datetime(wn, tow):
 
     See also: gpst_to_utc, datetime_to_tow
     """
-    seconds = np.array(tow)
-    weeks = np.array(wn)
-    return GPS_WEEK_0 + (weeks * WEEK_SECS * 1.e9).astype('timedelta64[ns]') \
-      + (seconds * 1.e9).astype('timedelta64[ns]')
-
+    seconds = pd.to_timedelta(tow, 's')
+    weeks = pd.to_timedelta(np.array(wn) * WEEK_SECS, 's')
+    return GPS_WEEK_0 + weeks + seconds
 
 def datetime_to_gps_format(t):
     """
@@ -152,22 +62,12 @@ def datetime_to_gps_format(t):
     See also: tow_to_datetime
     """
     t = pd.to_datetime(t)
-    if hasattr(t, 'to_datetime64'):
-        t = t.to_datetime64()
-    elif hasattr(t, 'values'):
-        t = t.values
-        assert t.dtype == '<M8[ns]'
-    else:
-        raise NotImplementedError(
-            "Expected either a Timestamp or datetime64 array")
     delta = (t - GPS_WEEK_0)
-    assert delta.dtype == '<m8[ns]'
     # compute week number
-    wn = np.floor(seconds_from_timedelta(delta) / WEEK_SECS).astype('int64')
+    wn = np.floor(delta.total_seconds() / WEEK_SECS).astype('int64')
     # subtract the whole weeks from timedelta and get the remaining seconds
-    delta -= (wn * WEEK_SECS * 1.e9).astype('timedelta64[ns]')
-
-    seconds = seconds_from_timedelta(delta)
+    delta -= pd.to_timedelta(wn * WEEK_SECS, 's')
+    seconds = delta.total_seconds()
     return {'wn': wn, 'tow': seconds}
 
 

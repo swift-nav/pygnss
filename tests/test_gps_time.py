@@ -18,8 +18,7 @@ from gnss import gps_time
 
 def assert_time_equal(x, y):
     x = pd.to_datetime(x)
-    if hasattr(x, 'to_datetime64'):
-        x = x.to_datetime64()
+    y = pd.to_datetime(y)
     np.testing.assert_array_equal(x, y)
 
 
@@ -49,24 +48,6 @@ def test_tow_datetime_roundtrip(t):
     and_back = gps_time.datetime_to_gps_format(actual)
     np.testing.assert_array_equal(and_back['wn'], wn_tow['wn'])
     np.testing.assert_array_equal(and_back['tow'], wn_tow['tow'])
-
-
-@pytest.mark.parametrize("td,fl", [
-        (np.timedelta64(1, 'ns'), 1.e-9),
-        (np.array(1e9).astype('timedelta64[ns]'), 1.),
-        (np.array(0).astype('timedelta64[ns]'), 0.),
-        (np.array([np.timedelta64(1, 'ns'), np.timedelta64('NaT', 'ns')]),
-         (1e-9, np.nan)),
-])
-def test_timedelta_to_seconds(td, fl):
-    actual_float = gps_time.seconds_from_timedelta(td)
-    np.testing.assert_array_equal(actual_float, fl)
-
-    actual_td = gps_time.timedelta_from_seconds(fl)
-    np.testing.assert_array_equal(actual_td, td)
-
-    roundtrip = gps_time.seconds_from_timedelta(actual_td)
-    np.testing.assert_array_equal(roundtrip, fl)
 
 
 @pytest.mark.parametrize("utc,dt", [
