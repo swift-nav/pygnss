@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='gnss',
+    name='swiftnav-gnss',
     description='GNSS Utilities',
     author='Swift Navigation',
     author_email='dev@swiftnav.com',
