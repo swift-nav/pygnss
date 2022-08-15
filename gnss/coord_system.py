@@ -1,5 +1,5 @@
 # Copyright (C) 2017 Swift Navigation Inc.
-# Contact: Swift Navigation <dev@swiftnav.com> 
+# Contact: Swift Navigation <dev@swiftnav.com>
 # This source is subject to the license found in the file 'LICENSE' which must
 # be be distributed together with this source. All other rights reserved.
 
@@ -229,7 +229,8 @@ def relative_position_in_ned(ecef_target, ecef_reference):
     """
     ecef_target = np.asarray(ecef_target)
     ecef_reference = np.asarray(ecef_reference)
-    return ned_from_ecef((ecef_target - ecef_reference), ecef_reference)
+    return ned_from_ecef(np.transpose(np.transpose(ecef_target) - ecef_reference),
+                         ecef_reference)
 
 
 def azimuth_elevation_from_ecef(ecef_target, ecef_reference):
@@ -263,6 +264,6 @@ def azimuth_elevation_from_ecef(ecef_target, ecef_reference):
     # atan2 returns angle in range [-pi, pi], usually azimuth is defined in the
     # range [0, 2pi]. */
     azimuth = np.mod(np.arctan2(ned[1], ned[0]), 2 * np.pi)
-    elevation = np.arcsin(-ned[2] / np.linalg.norm(ned))
+    elevation = np.arcsin(-ned[2] / np.linalg.norm(ned, axis=0))
 
     return np.rad2deg(azimuth), np.rad2deg(elevation)
