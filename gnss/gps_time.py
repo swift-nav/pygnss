@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright (C) 2018 Swift Navigation Inc.
 # Contact: Swift Navigation <dev@swiftnav.com>
 # This source is subject to the license found in the file 'LICENSE' which must
@@ -7,7 +8,7 @@ import numpy as np
 import pandas as pd
 
 WEEK_SECS = 7 * 24 * 60 * 60
-GPS_WEEK_0 = np.datetime64('1980-01-06T00:00:00Z', 'ns')
+GPS_WEEK_0 = np.datetime64('1980-01-06T00:00:00', 'ns')
 
 
 def gps_format_to_datetime(wn, tow):
@@ -38,6 +39,7 @@ def gps_format_to_datetime(wn, tow):
     seconds = pd.to_timedelta(tow, 's')
     weeks = pd.to_timedelta(np.array(wn) * WEEK_SECS, 's')
     return GPS_WEEK_0 + weeks + seconds
+
 
 def datetime_to_gps_format(t):
     """
@@ -94,16 +96,16 @@ def gps_minus_utc_seconds(gpst):
       Returns the number (or an array of them) of leap second values.
     """
 
-    delta_utc = np.zeros(gpst.shape, np.int)
+    delta_utc = np.zeros(gpst.shape, int)
     delta_utc = np.array(delta_utc)
-    assert np.all(gpst >= np.datetime64('1999-01-01T00:00:13Z'))
+    assert np.all(gpst >= np.datetime64('1999-01-01T00:00:13'))
     # difference was 16 seconds on 1st July 2012, add the leap seconds since that
     delta_utc += 13
-    delta_utc[gpst >= np.datetime64('2005-01-01T00:00:13Z')] += 1
-    delta_utc[gpst >= np.datetime64('2008-01-01T00:00:14Z')] += 1
-    delta_utc[gpst >= np.datetime64('2012-07-01T00:00:15Z')] += 1
-    delta_utc[gpst >= np.datetime64('2015-07-01T00:00:16Z')] += 1
-    delta_utc[gpst >= np.datetime64('2017-01-01T00:00:17Z')] += 1
+    delta_utc[gpst >= np.datetime64('2005-01-01T00:00:13')] += 1
+    delta_utc[gpst >= np.datetime64('2008-01-01T00:00:14')] += 1
+    delta_utc[gpst >= np.datetime64('2012-07-01T00:00:15')] += 1
+    delta_utc[gpst >= np.datetime64('2015-07-01T00:00:16')] += 1
+    delta_utc[gpst >= np.datetime64('2017-01-01T00:00:17')] += 1
     return delta_utc
 
 
