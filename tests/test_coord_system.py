@@ -23,7 +23,8 @@ test_data = [
     ((-90, 0, 0), (0, 0, -EARTH_B)),  # South Pole
     ((90, 0, 22), (0, 0, EARTH_B + 22)),  # 22m above north pole
     ((-90, 0, 22), (0, 0, -(EARTH_B + 22))),  # 22m above south pole
-    ((0, 0, 22), (EARTH_A + 22, 0, 0)),  # 22m above the equator end prime meridian
+    # 22m above the equator end prime meridian
+    ((0, 0, 22), (EARTH_A + 22, 0, 0)),
     ((0, 180, 22), (-(EARTH_A + 22), 0, 0)),  # 22m above the equator
     ((38, 122, 0), (-2666781.2433701, 4267742.1051642, 3905443.968419)),
 ]
@@ -81,8 +82,9 @@ def test_ecef_llh_roundtrip(x):
                           # component, hence the small magnitude.
                           ((0., 0., 0.01), (EARTH_A, 0, 0), (0.01, 0., 0.)),
                           # Now try a spot check with angles
-                          ((1, 1, 1), (2, 2, 2), (1.13204490e-01, 1.11022302e-16, -1.72834740e+00))
-                         ])
+                          ((1, 1, 1), (2, 2, 2), (1.13204490e-01,
+                           1.11022302e-16, -1.72834740e+00))
+                          ])
 def test_ned_from_ecef(vector, reference, expected):
     actual = cs.ned_from_ecef(vector, reference)
     assert actual == approx(expected)
@@ -97,14 +99,25 @@ def test_ned_from_ecef(vector, reference, expected):
                           # Satellite is directly North of the reference
                           ((EARTH_A, 0, SAT_ALTITUDE), (EARTH_A, 0, 0), (0., 0.)),
                           # Satellite is east at elevation angle of 45.
-                          ((EARTH_A + SAT_ALTITUDE, 0, SAT_ALTITUDE), (EARTH_A, 0, 0), (0., 45.)),
+                          ((EARTH_A + SAT_ALTITUDE, 0, SAT_ALTITUDE),
+                           (EARTH_A, 0, 0), (0., 45.)),
                           # Satellite is north east at elevation angle of tan^-1(1, sqrt(2))
                           ((EARTH_A + SAT_ALTITUDE, SAT_ALTITUDE, SAT_ALTITUDE),
                            (EARTH_A, 0, 0),
                            (45., np.rad2deg(np.arctan2(1., np.sqrt(2))))),
-                         ])
+                          ])
 def test_azimuth_elevation_from_ecef(target, reference, expected):
     azimuth, elevation = cs.azimuth_elevation_from_ecef(target, reference)
     assert azimuth == approx(expected[0])
     assert elevation == approx(expected[1])
-    
+
+
+def test_azimuth_elevation_from_ecef_vec():
+    target = ([EARTH_A + SAT_ALTITUDE, EARTH_A, EARTH_A],
+              [0, SAT_ALTITUDE, 0],
+              [0, 0, SAT_ALTITUDE])
+    reference = (EARTH_A, 0, 0)
+    expected = ([0., 90., 0.], [90., 0., 0.])
+    azimuth, elevation = cs.azimuth_elevation_from_ecef(target, reference)
+    assert azimuth == approx(expected[0])
+    assert elevation == approx(expected[1])
