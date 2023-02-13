@@ -2,26 +2,24 @@
 
 [![Build Status](https://travis-ci.org/swift-nav/pygnss.svg?branch=master)](https://travis-ci.org/swift-nav/pygnss)
 
-`PyGNSS` is a Python library which which provides various GNSS related utilites. `PyGNSS` runs on both Python 2 and 3. The coordinate system transformations are implemented based on the algorithms used by `libswiftnav`.
+`PyGNSS` is a Python library which which provides various GNSS related utilites.  The coordinate system transformations are implemented based on the algorithms used by `libswiftnav`.
 
-
-## Installation 
+## Installation
 
 It is recommended to install `pygnss` in a virtualenv to avoid polluting global system state.
 
 To install the latest version of `pygnss` from git:
 
-` $ pip install 'git+https://github.com/swift-nav/pygnss.git'`
-
+`$ pip install 'git+https://github.com/swift-nav/pygnss.git'`
 
 ## Usage
 
 Currently, `pygnss` provides functions for the following coordinate transformations:
+
 * `llh_from_ecef`
 * `ecef_from_llh`
 * `ned_from_ecef`
 * `azimuth_elevation_from_ecef`
-
 
 ## License
 

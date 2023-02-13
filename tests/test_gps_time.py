@@ -31,15 +31,18 @@ def assert_time_not_equal(x, y):
         pass
 
 
-@pytest.mark.parametrize("t", [
-    datetime.datetime(2000, 1, 1),
-    datetime.datetime(2016, 1, 20),
-    gps_time.GPS_WEEK_0,
-    pd.date_range(
-        start=datetime.datetime(2016, 1, 1),
-        end=datetime.datetime(2016, 1, 20)),
-    np.datetime64('2016-01-20T05:00:00.999999'),
-])
+@pytest.mark.parametrize(
+    "t",
+    [
+        datetime.datetime(2000, 1, 1),
+        datetime.datetime(2016, 1, 20),
+        gps_time.GPS_WEEK_0,
+        pd.date_range(
+            start=datetime.datetime(2016, 1, 1), end=datetime.datetime(2016, 1, 20)
+        ),
+        np.datetime64("2016-01-20T05:00:00.999999"),
+    ],
+)
 def test_tow_datetime_roundtrip(t):
     wn_tow = gps_time.datetime_to_gps_format(t)
     actual = gps_time.gps_format_to_datetime(**wn_tow)
@@ -47,30 +50,33 @@ def test_tow_datetime_roundtrip(t):
     # object, so we first need to convert the original value.
     assert_time_equal(t, actual)
     and_back = gps_time.datetime_to_gps_format(actual)
-    np.testing.assert_array_equal(and_back['wn'], wn_tow['wn'])
-    np.testing.assert_array_equal(and_back['tow'], wn_tow['tow'])
+    np.testing.assert_array_equal(and_back["wn"], wn_tow["wn"])
+    np.testing.assert_array_equal(and_back["tow"], wn_tow["tow"])
 
 
-@pytest.mark.parametrize("utc,dt", [
-    (np.datetime64('2012-06-30T23:59:59'), 15),
-    (np.datetime64('2017-07-01T00:00:00'), 18),
-])
+@pytest.mark.parametrize(
+    "utc,dt",
+    [
+        (np.datetime64("2012-06-30T23:59:59"), 15),
+        (np.datetime64("2017-07-01T00:00:00"), 18),
+    ],
+)
 def test_gps_minus_utc_seconds(utc, dt):
     np.testing.assert_array_equal(gps_time.gps_minus_utc_seconds(utc), dt)
 
 
-@pytest.fixture(params=[
-    (np.datetime64('2015-07-01T00:00:15'),
-     np.datetime64('2015-06-30T23:59:59')),
-    (np.datetime64('2015-07-01T00:00:15.9999'),
-     np.datetime64('2015-06-30T23:59:59.9999')),
-    (np.datetime64('2015-07-01T00:00:17'),
-     np.datetime64('2015-07-01T00:00:00')),
-    (np.datetime64('2017-01-01T00:00:16'),
-     np.datetime64('2016-12-31T23:59:59')),
-    (np.datetime64('2017-01-01T00:00:18'),
-     np.datetime64('2017-01-01T00:00:00')),
-])
+@pytest.fixture(
+    params=[
+        (np.datetime64("2015-07-01T00:00:15"), np.datetime64("2015-06-30T23:59:59")),
+        (
+            np.datetime64("2015-07-01T00:00:15.9999"),
+            np.datetime64("2015-06-30T23:59:59.9999"),
+        ),
+        (np.datetime64("2015-07-01T00:00:17"), np.datetime64("2015-07-01T00:00:00")),
+        (np.datetime64("2017-01-01T00:00:16"), np.datetime64("2016-12-31T23:59:59")),
+        (np.datetime64("2017-01-01T00:00:18"), np.datetime64("2017-01-01T00:00:00")),
+    ]
+)
 def gpst_to_utc_testcase(request):
     # GPS time and corresponding UTC time
     # Unfortunately Python datetime64 cannot handle leap second
@@ -88,5 +94,5 @@ def test_utc_to_gps(gpst_to_utc_testcase):
     # Test single timestamps
     expected_gpst, utc = gpst_to_utc_testcase
     gpst = gps_time.utc_to_gpst(utc)
-    result_gpst = gps_time.gps_format_to_datetime(gpst['wn'], gpst['tow'])
+    result_gpst = gps_time.gps_format_to_datetime(gpst["wn"], gpst["tow"])
     np.testing.assert_array_equal(result_gpst, expected_gpst)

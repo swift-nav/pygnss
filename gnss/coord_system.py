@@ -9,15 +9,15 @@ import numpy as np
 import numpy.typing as npt
 
 ArrayLike = Union[List, Tuple, np.ndarray]
-Coordinate = Tuple[npt.NDArray[np.float_],
-                   npt.NDArray[np.float_],
-                   npt.NDArray[np.float_]]
+Coordinate = Tuple[
+    npt.NDArray[np.float_], npt.NDArray[np.float_], npt.NDArray[np.float_]
+]
 
 WGS84_A: float = 6378137.0
 WGS84_IF: float = 298.257223563
-WGS84_F: float = (1 / WGS84_IF)
+WGS84_F: float = 1 / WGS84_IF
 WGS84_E: float = np.sqrt(2 * WGS84_F - WGS84_F * WGS84_F)
-WGS84_B: float = (WGS84_A * (1 - WGS84_F))
+WGS84_B: float = WGS84_A * (1 - WGS84_F)
 
 
 def llh_from_ecef(ecef: ArrayLike) -> Coordinate:
@@ -96,8 +96,7 @@ def llh_from_ecef(ecef: ArrayLike) -> Coordinate:
         A_n = np.sqrt(S * S + C * C)
         D_n = Z * A_n * A_n * A_n + WGS84_E * WGS84_E * S * S * S
         F_n = P * A_n * A_n * A_n - WGS84_E * WGS84_E * C * C * C
-        B_n = 1.5 * WGS84_E * S * C * C * (A_n *
-                                           (P * S - Z * C) - WGS84_E * S * C)
+        B_n = 1.5 * WGS84_E * S * C * C * (A_n * (P * S - Z * C) - WGS84_E * S * C)
 
         # Update step.
         S = D_n * F_n - B_n * S
@@ -124,7 +123,7 @@ def llh_from_ecef(ecef: ArrayLike) -> Coordinate:
         # explicityl trying to avoid and it may be that this solution is just
         # reverting back to the method of iterating on T directly, perhaps this
         # bears more thought?
-        if (S > C):
+        if S > C:
             C = C / S
             S = 1.0
         else:
@@ -140,8 +139,9 @@ def llh_from_ecef(ecef: ArrayLike) -> Coordinate:
 
     A_n = np.sqrt(S * S + C * C)
     lat = np.copysign(1.0, ecef[2]) * np.arctan(S / (e_c * C))
-    alt = (p * e_c * C + np.fabs(ecef[2]) * S - WGS84_A * e_c * A_n
-           ) / np.sqrt(e_c * e_c * C * C + S * S)
+    alt = (p * e_c * C + np.fabs(ecef[2]) * S - WGS84_A * e_c * A_n) / np.sqrt(
+        e_c * e_c * C * C + S * S
+    )
 
     return np.rad2deg(lat), np.rad2deg(lon), alt
 
@@ -207,17 +207,16 @@ def ecef_to_ned_matrix(ref_ecef: ArrayLike) -> npt.NDArray[np.float_]:
     return M
 
 
-def ned_from_ecef(ecef_vector: ArrayLike,
-                  reference_location: ArrayLike
-                  ) -> npt.NDArray[np.float_]:
-    """Convert ECEF coordinates into NED frame of given reference.
-    """
+def ned_from_ecef(
+    ecef_vector: ArrayLike, reference_location: ArrayLike
+) -> npt.NDArray[np.float_]:
+    """Convert ECEF coordinates into NED frame of given reference."""
     return np.dot(ecef_to_ned_matrix(reference_location), ecef_vector)
 
 
 def relative_position_in_ned(
-        ecef_target: ArrayLike,
-        ecef_reference: ArrayLike) -> npt.NDArray[np.float_]:
+    ecef_target: ArrayLike, ecef_reference: ArrayLike
+) -> npt.NDArray[np.float_]:
     """Returns the vector between two ECEF points in the NED frame of the
     reference.
 
@@ -238,13 +237,13 @@ def relative_position_in_ned(
     """
     ecef_target = np.asarray(ecef_target)
     ecef_reference = np.asarray(ecef_reference)
-    return ned_from_ecef(np.transpose(np.transpose(ecef_target) - ecef_reference),
-                         ecef_reference)
+    return ned_from_ecef(
+        np.transpose(np.transpose(ecef_target) - ecef_reference), ecef_reference
+    )
 
 
 def azimuth_elevation_from_ecef(
-        ecef_target: ArrayLike,
-        ecef_reference: ArrayLike
+    ecef_target: ArrayLike, ecef_reference: ArrayLike
 ) -> Tuple[npt.NDArray[np.float_], npt.NDArray[np.float_]]:
     """Returns the azimuth and elevation of a vector pointing from `ref_position`
     to `position` where both are given in ECEF

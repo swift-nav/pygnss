@@ -30,7 +30,7 @@ test_data = [
 ]
 
 approx_dist = partial(approx, abs=1e-6)
-approx_deg = partial(approx, abs=np.deg2rad(1e-7/3600))
+approx_deg = partial(approx, abs=np.deg2rad(1e-7 / 3600))
 
 
 def llh_isclose(a, b):
@@ -59,8 +59,9 @@ def test_llh_ecef_roundtrip(x):
 
 
 # generate coordinates outside a 800km sphere from the center of the earth
-st_ecef = st.floats(min_value=800*1000, max_value=4*EARTH_A) | st.floats(
-    min_value=-4*EARTH_A, max_value=-800*1000)
+st_ecef = st.floats(min_value=800 * 1000, max_value=4 * EARTH_A) | st.floats(
+    min_value=-4 * EARTH_A, max_value=-800 * 1000
+)
 
 
 @given(st.tuples(st_ecef, st_ecef, st_ecef))
@@ -68,44 +69,50 @@ def test_ecef_llh_roundtrip(x):
     assert cs.ecef_from_llh(cs.llh_from_ecef(x)) == approx_dist(x)
 
 
-@pytest.mark.parametrize("vector,reference,expected",
-                         # this vector should be directly above the reference point so
-                         # we expect the north and east components to be zero and the down
-                         # component to be -1.
-                         [((1., 0, 0), (EARTH_A, 0, 0), (0., 0., -1.)),
-                          # Here the vector should be pointing due east, there may be
-                          # some second order error which translate into the down
-                          # component, hence the small magnitude.
-                          ((0., 0.01, 0.), (EARTH_A, 0, 0), (0., 0.01, 0)),
-                          # Here the vector should be pointing due east, there may be
-                          # some second order error which translate into the down
-                          # component, hence the small magnitude.
-                          ((0., 0., 0.01), (EARTH_A, 0, 0), (0.01, 0., 0.)),
-                          # Now try a spot check with angles
-                          ((1, 1, 1), (2, 2, 2), (1.13204490e-01,
-                           1.11022302e-16, -1.72834740e+00))
-                          ])
+@pytest.mark.parametrize(
+    "vector,reference,expected",
+    # this vector should be directly above the reference point so
+    # we expect the north and east components to be zero and the down
+    # component to be -1.
+    [
+        ((1.0, 0, 0), (EARTH_A, 0, 0), (0.0, 0.0, -1.0)),
+        # Here the vector should be pointing due east, there may be
+        # some second order error which translate into the down
+        # component, hence the small magnitude.
+        ((0.0, 0.01, 0.0), (EARTH_A, 0, 0), (0.0, 0.01, 0)),
+        # Here the vector should be pointing due east, there may be
+        # some second order error which translate into the down
+        # component, hence the small magnitude.
+        ((0.0, 0.0, 0.01), (EARTH_A, 0, 0), (0.01, 0.0, 0.0)),
+        # Now try a spot check with angles
+        ((1, 1, 1), (2, 2, 2), (1.13204490e-01, 1.11022302e-16, -1.72834740e00)),
+    ],
+)
 def test_ned_from_ecef(vector, reference, expected):
     actual = cs.ned_from_ecef(vector, reference)
     assert actual == approx(expected)
 
 
-@pytest.mark.parametrize("target,reference,expected",
-                         # Here we place a target directly above the reference in
-                         # which case the elevation should be 90
-                         [((EARTH_A + SAT_ALTITUDE, 0, 0), (EARTH_A, 0, 0), (0., 90.)),
-                          # Satellite is directly East of the reference
-                          ((EARTH_A, SAT_ALTITUDE, 0), (EARTH_A, 0, 0), (90., 0.)),
-                          # Satellite is directly North of the reference
-                          ((EARTH_A, 0, SAT_ALTITUDE), (EARTH_A, 0, 0), (0., 0.)),
-                          # Satellite is east at elevation angle of 45.
-                          ((EARTH_A + SAT_ALTITUDE, 0, SAT_ALTITUDE),
-                           (EARTH_A, 0, 0), (0., 45.)),
-                          # Satellite is north east at elevation angle of tan^-1(1, sqrt(2))
-                          ((EARTH_A + SAT_ALTITUDE, SAT_ALTITUDE, SAT_ALTITUDE),
-                           (EARTH_A, 0, 0),
-                           (45., np.rad2deg(np.arctan2(1., np.sqrt(2))))),
-                          ])
+@pytest.mark.parametrize(
+    "target,reference,expected",
+    # Here we place a target directly above the reference in
+    # which case the elevation should be 90
+    [
+        ((EARTH_A + SAT_ALTITUDE, 0, 0), (EARTH_A, 0, 0), (0.0, 90.0)),
+        # Satellite is directly East of the reference
+        ((EARTH_A, SAT_ALTITUDE, 0), (EARTH_A, 0, 0), (90.0, 0.0)),
+        # Satellite is directly North of the reference
+        ((EARTH_A, 0, SAT_ALTITUDE), (EARTH_A, 0, 0), (0.0, 0.0)),
+        # Satellite is east at elevation angle of 45.
+        ((EARTH_A + SAT_ALTITUDE, 0, SAT_ALTITUDE), (EARTH_A, 0, 0), (0.0, 45.0)),
+        # Satellite is north east at elevation angle of tan^-1(1, sqrt(2))
+        (
+            (EARTH_A + SAT_ALTITUDE, SAT_ALTITUDE, SAT_ALTITUDE),
+            (EARTH_A, 0, 0),
+            (45.0, np.rad2deg(np.arctan2(1.0, np.sqrt(2)))),
+        ),
+    ],
+)
 def test_azimuth_elevation_from_ecef(target, reference, expected):
     azimuth, elevation = cs.azimuth_elevation_from_ecef(target, reference)
     assert azimuth == approx(expected[0])
@@ -113,11 +120,13 @@ def test_azimuth_elevation_from_ecef(target, reference, expected):
 
 
 def test_azimuth_elevation_from_ecef_vec():
-    target = ([EARTH_A + SAT_ALTITUDE, EARTH_A, EARTH_A],
-              [0, SAT_ALTITUDE, 0],
-              [0, 0, SAT_ALTITUDE])
+    target = (
+        [EARTH_A + SAT_ALTITUDE, EARTH_A, EARTH_A],
+        [0, SAT_ALTITUDE, 0],
+        [0, 0, SAT_ALTITUDE],
+    )
     reference = (EARTH_A, 0, 0)
-    expected = ([0., 90., 0.], [90., 0., 0.])
+    expected = ([0.0, 90.0, 0.0], [90.0, 0.0, 0.0])
     azimuth, elevation = cs.azimuth_elevation_from_ecef(target, reference)
     assert azimuth == approx(expected[0])
     assert elevation == approx(expected[1])
