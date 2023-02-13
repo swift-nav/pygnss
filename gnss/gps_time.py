@@ -4,11 +4,33 @@
 # This source is subject to the license found in the file 'LICENSE' which must
 # be be distributed together with this source. All other rights reserved.
 
+from datetime import datetime
+
 import numpy as np
 import pandas as pd
 
 WEEK_SECS = 7 * 24 * 60 * 60
 GPS_WEEK_0 = np.datetime64("1980-01-06T00:00:00", "ns")
+LEAP_SECOND_DATES = [
+    np.datetime64("1981-07-01T00:00:00", "ns"),
+    np.datetime64("1982-07-01T00:00:00", "ns"),
+    np.datetime64("1983-07-01T00:00:00", "ns"),
+    np.datetime64("1985-07-01T00:00:00", "ns"),
+    np.datetime64("1988-01-01T00:00:00", "ns"),
+    np.datetime64("1990-01-01T00:00:00", "ns"),
+    np.datetime64("1991-01-01T00:00:00", "ns"),
+    np.datetime64("1992-07-01T00:00:00", "ns"),
+    np.datetime64("1993-07-01T00:00:00", "ns"),
+    np.datetime64("1994-07-01T00:00:00", "ns"),
+    np.datetime64("1996-01-01T00:00:00", "ns"),
+    np.datetime64("1997-07-01T00:00:00", "ns"),
+    np.datetime64("1999-01-01T00:00:00", "ns"),
+    np.datetime64("2006-01-01T00:00:00", "ns"),
+    np.datetime64("2009-01-01T00:00:00", "ns"),
+    np.datetime64("2012-07-01T00:00:00", "ns"),
+    np.datetime64("2015-07-01T00:00:00", "ns"),
+    np.datetime64("2017-01-01T00:00:00", "ns"),
+]
 
 
 def gps_format_to_datetime(wn, tow):
@@ -18,15 +40,15 @@ def gps_format_to_datetime(wn, tow):
     into UTC.  The resulting datetime object is still in GPS time
     and will have been rounded to nanosecond precision (which is
     too coarse to accurately compute timedeltas such as time of
-    flight.
+    flight).
 
     Parameters
     -----------
     wn : int
-      An integer corresponding to the week number of a time.
+      An integer (or array) corresponding to the week number of a time.
     tow : float
-      A float corresponding to the time of week (in seconds) from
-      the beginning of the week number (wn).
+      A float (or array) corresponding to the time of week (in seconds) from the
+      beginning of the week number (wn).
 
     Returns
     -------
@@ -79,8 +101,6 @@ def gps_minus_utc_seconds(gpst):
     This function's input is gps time so the time offset changes e.g.
     between 00:00:16 and 00:00:17 in GPS time.
 
-    Supports dates from 1th Jul 2012.
-
     Parameters
     ----------
     gpst : np.datetime64, pd.Timestamp, datetime.datetime
@@ -95,14 +115,12 @@ def gps_minus_utc_seconds(gpst):
     """
 
     delta_utc = np.zeros_like(gpst, int)
-    assert np.all(gpst >= np.datetime64("1999-01-01T00:00:13"))
-    # difference was 16 seconds on 1st July 2012, add the leap seconds since that
-    delta_utc += 13
-    delta_utc[gpst >= np.datetime64("2005-01-01T00:00:13")] += 1
-    delta_utc[gpst >= np.datetime64("2008-01-01T00:00:14")] += 1
-    delta_utc[gpst >= np.datetime64("2012-07-01T00:00:15")] += 1
-    delta_utc[gpst >= np.datetime64("2015-07-01T00:00:16")] += 1
-    delta_utc[gpst >= np.datetime64("2017-01-01T00:00:17")] += 1
+    if isinstance(gpst, datetime):
+        gpst = np.datetime64(gpst)
+
+    for i, date in enumerate(LEAP_SECOND_DATES):
+        delta_utc[gpst >= (date + np.timedelta64(i, "s"))] += 1
+
     return delta_utc
 
 
