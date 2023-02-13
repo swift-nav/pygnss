@@ -30,11 +30,11 @@ def gps_format_to_datetime(wn, tow):
 
     Returns
     -------
-    utc : np.datetime64
-      Returns a np.datetime64 object (or an array of them) that holds
+    utc : pd.Timestamp
+      Returns a pd.Timestamp object (or an array of them) that holds
       the UTC representation of the corresponding gpst.
 
-    See also: gpst_to_utc, datetime_to_tow
+    See also: gpst_to_utc
     """
     seconds = pd.to_timedelta(tow, "s")
     weeks = pd.to_timedelta(np.array(wn) * WEEK_SECS, "s")
@@ -60,8 +60,6 @@ def datetime_to_gps_format(t):
     wn_tow : dict
       Dictionary with attributes 'wn' and 'tow' corresponding to the
       week number and time of week.
-
-    See also: tow_to_datetime
     """
     t = pd.to_datetime(t)
     delta = t - GPS_WEEK_0
@@ -92,11 +90,14 @@ def gps_minus_utc_seconds(gpst):
 
     Returns
     -------
-    utc : float
+    utc : int
       Returns the number (or an array of them) of leap second values.
     """
+    if isinstance(gpst, (np.ndarray, pd.DatetimeIndex)):
+        delta_utc = np.zeros(gpst.shape, int)
+    else:
+        delta_utc = np.array([], dtype=int)
 
-    delta_utc = np.zeros(gpst.shape, int)
     delta_utc = np.array(delta_utc)
     assert np.all(gpst >= np.datetime64("1999-01-01T00:00:13"))
     # difference was 16 seconds on 1st July 2012, add the leap seconds since that
@@ -106,7 +107,7 @@ def gps_minus_utc_seconds(gpst):
     delta_utc[gpst >= np.datetime64("2012-07-01T00:00:15")] += 1
     delta_utc[gpst >= np.datetime64("2015-07-01T00:00:16")] += 1
     delta_utc[gpst >= np.datetime64("2017-01-01T00:00:17")] += 1
-    return delta_utc
+    return delta_utc.item() if delta_utc.size == 1 else delta_utc
 
 
 def gpst_to_utc(gpst):
@@ -133,6 +134,10 @@ def gpst_to_utc(gpst):
       the UTC representation of the corresponding gpst.
 
     """
+    if isinstance(gpst, dict):
+        gpst = gps_format_to_datetime(gpst["wn"], gpst["tow"])
+
+    gpst = pd.to_datetime(gpst)
     delta_utc = gps_minus_utc_seconds(gpst)
     delta_utc = np.asarray(delta_utc)
 
@@ -162,14 +167,15 @@ def utc_to_gpst(utc):
       A dictionary with attributes 'wn' and 'tow' holding the
       week number and time of week that correspond to the input utc times.
 
-    See also: datetime_to_tow, gpst_to_utc
+    See also: gpst_to_utc
     """
     # GPS-UTC offset is defined in GPS time, so some iteration is needed
+
     delta_utc_tmp = gps_minus_utc_seconds(utc)
     delta_utc_tmp = np.array(delta_utc_tmp)
+    utc = pd.to_datetime(utc)
     gpst = utc + ((delta_utc_tmp) * 1e9).astype("timedelta64[ns]")
 
     delta_utc = gps_minus_utc_seconds(gpst)
     delta_utc = np.array(delta_utc)
-    utc = pd.to_datetime(utc)
     return datetime_to_gps_format(utc + (delta_utc * 1e9).astype("timedelta64[ns]"))
