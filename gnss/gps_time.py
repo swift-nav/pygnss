@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 
 WEEK_SECS = 7 * 24 * 60 * 60
-GPS_WEEK_0 = np.datetime64('1980-01-06T00:00:00', 'ns')
+GPS_WEEK_0 = np.datetime64("1980-01-06T00:00:00", "ns")
 
 
 def gps_format_to_datetime(wn, tow):
@@ -36,8 +36,8 @@ def gps_format_to_datetime(wn, tow):
 
     See also: gpst_to_utc, datetime_to_tow
     """
-    seconds = pd.to_timedelta(tow, 's')
-    weeks = pd.to_timedelta(np.array(wn) * WEEK_SECS, 's')
+    seconds = pd.to_timedelta(tow, "s")
+    weeks = pd.to_timedelta(np.array(wn) * WEEK_SECS, "s")
     return GPS_WEEK_0 + weeks + seconds
 
 
@@ -64,13 +64,13 @@ def datetime_to_gps_format(t):
     See also: tow_to_datetime
     """
     t = pd.to_datetime(t)
-    delta = (t - GPS_WEEK_0)
+    delta = t - GPS_WEEK_0
     # compute week number
-    wn = np.floor(delta.total_seconds() / WEEK_SECS).astype('int64')
+    wn = np.floor(delta.total_seconds() / WEEK_SECS).astype("int64")
     # subtract the whole weeks from timedelta and get the remaining seconds
-    delta -= pd.to_timedelta(wn * WEEK_SECS, 's')
+    delta -= pd.to_timedelta(wn * WEEK_SECS, "s")
     seconds = delta.total_seconds()
-    return {'wn': wn, 'tow': seconds}
+    return {"wn": wn, "tow": seconds}
 
 
 def gps_minus_utc_seconds(gpst):
@@ -98,14 +98,14 @@ def gps_minus_utc_seconds(gpst):
 
     delta_utc = np.zeros(gpst.shape, int)
     delta_utc = np.array(delta_utc)
-    assert np.all(gpst >= np.datetime64('1999-01-01T00:00:13'))
+    assert np.all(gpst >= np.datetime64("1999-01-01T00:00:13"))
     # difference was 16 seconds on 1st July 2012, add the leap seconds since that
     delta_utc += 13
-    delta_utc[gpst >= np.datetime64('2005-01-01T00:00:13')] += 1
-    delta_utc[gpst >= np.datetime64('2008-01-01T00:00:14')] += 1
-    delta_utc[gpst >= np.datetime64('2012-07-01T00:00:15')] += 1
-    delta_utc[gpst >= np.datetime64('2015-07-01T00:00:16')] += 1
-    delta_utc[gpst >= np.datetime64('2017-01-01T00:00:17')] += 1
+    delta_utc[gpst >= np.datetime64("2005-01-01T00:00:13")] += 1
+    delta_utc[gpst >= np.datetime64("2008-01-01T00:00:14")] += 1
+    delta_utc[gpst >= np.datetime64("2012-07-01T00:00:15")] += 1
+    delta_utc[gpst >= np.datetime64("2015-07-01T00:00:16")] += 1
+    delta_utc[gpst >= np.datetime64("2017-01-01T00:00:17")] += 1
     return delta_utc
 
 
@@ -137,7 +137,7 @@ def gpst_to_utc(gpst):
     delta_utc = np.asarray(delta_utc)
 
     # now subtract out the delta_utc value (which is given in float seconds)
-    return gpst - (delta_utc * 1e9).astype('timedelta64[ns]')
+    return gpst - (delta_utc * 1e9).astype("timedelta64[ns]")
 
 
 def utc_to_gpst(utc):
@@ -167,9 +167,9 @@ def utc_to_gpst(utc):
     # GPS-UTC offset is defined in GPS time, so some iteration is needed
     delta_utc_tmp = gps_minus_utc_seconds(utc)
     delta_utc_tmp = np.array(delta_utc_tmp)
-    gpst = utc + ((delta_utc_tmp) * 1e9).astype('timedelta64[ns]')
+    gpst = utc + ((delta_utc_tmp) * 1e9).astype("timedelta64[ns]")
 
     delta_utc = gps_minus_utc_seconds(gpst)
     delta_utc = np.array(delta_utc)
     utc = pd.to_datetime(utc)
-    return datetime_to_gps_format(utc + (delta_utc * 1e9).astype('timedelta64[ns]'))
+    return datetime_to_gps_format(utc + (delta_utc * 1e9).astype("timedelta64[ns]"))
