@@ -19,6 +19,7 @@ setup(
             "hypothesis",
             "mypy",
             "pandas-stubs",
+            "black",
         ],
     },
     license="mit",
