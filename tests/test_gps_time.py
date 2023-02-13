@@ -41,6 +41,7 @@ def assert_time_not_equal(x, y):
             start=datetime.datetime(2016, 1, 1), end=datetime.datetime(2016, 1, 20)
         ),
         np.datetime64("2016-01-20T05:00:00.999999"),
+        pd.Timestamp("2016-01-20T05:00:00.999999"),
     ],
 )
 def test_tow_datetime_roundtrip(t):
@@ -59,18 +60,51 @@ def test_tow_datetime_roundtrip(t):
     [
         (np.datetime64("2012-06-30T23:59:59"), 15),
         (np.datetime64("2017-07-01T00:00:00"), 18),
+        (
+            np.array(
+                [
+                    np.datetime64("2012-06-30T23:59:59"),
+                    np.datetime64("2017-07-01T00:00:00"),
+                ]
+            ),
+            np.array([15, 18]),
+        ),
+        (pd.Timestamp("2017-07-01T00:00:00"), 18),
+        (datetime.datetime(2017, 7, 1), 18),
     ],
 )
 def test_gps_minus_utc_seconds(utc, dt):
-    np.testing.assert_array_equal(gps_time.gps_minus_utc_seconds(utc), dt)
+    if isinstance(dt, np.ndarray):
+        np.testing.assert_array_equal(gps_time.gps_minus_utc_seconds(utc), dt)
+    else:
+        assert dt == gps_time.gps_minus_utc_seconds(utc)
 
 
 @pytest.fixture(
     params=[
         (np.datetime64("2015-07-01T00:00:15"), np.datetime64("2015-06-30T23:59:59")),
+        (pd.Timestamp("2015-07-01T00:00:15"), pd.Timestamp("2015-06-30T23:59:59")),
+        (
+            datetime.datetime(2015, 7, 1, 0, 0, 15),
+            datetime.datetime(2015, 6, 30, 23, 59, 59),
+        ),
         (
             np.datetime64("2015-07-01T00:00:15.9999"),
             np.datetime64("2015-06-30T23:59:59.9999"),
+        ),
+        (
+            np.array(
+                [
+                    np.datetime64("2015-07-01T00:00:15"),
+                    np.datetime64("2015-07-01T00:00:15.9999"),
+                ]
+            ),
+            np.array(
+                [
+                    np.datetime64("2015-06-30T23:59:59"),
+                    np.datetime64("2015-06-30T23:59:59.9999"),
+                ]
+            ),
         ),
         (np.datetime64("2015-07-01T00:00:17"), np.datetime64("2015-07-01T00:00:00")),
         (np.datetime64("2017-01-01T00:00:16"), np.datetime64("2016-12-31T23:59:59")),
