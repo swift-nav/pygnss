@@ -1,14 +1,43 @@
-# type: ignore
 # Copyright (C) 2018 Swift Navigation Inc.
 # Contact: Swift Navigation <dev@swiftnav.com>
 # This source is subject to the license found in the file 'LICENSE' which must
 # be be distributed together with this source. All other rights reserved.
 
+from datetime import datetime
+from typing import Union, overload
+
 import numpy as np
 import pandas as pd
+from numpy.typing import NDArray
+from typing_extensions import TypedDict
 
 WEEK_SECS = 7 * 24 * 60 * 60
 GPS_WEEK_0 = np.datetime64("1980-01-06T00:00:00", "ns")
+
+DatetimeScalar = Union[datetime, np.datetime64, pd.Timestamp]
+DatetimeArray = Union[NDArray[np.datetime64], pd.DatetimeIndex]
+
+
+class WnTow(TypedDict):
+    wn: int
+    tow: float
+
+
+class WnTowArray(TypedDict):
+    wn: NDArray[np.int_]
+    tow: NDArray[np.float_]
+
+
+@overload
+def gps_format_to_datetime(
+    wn: NDArray[np.int_], tow: NDArray[np.float_]
+) -> pd.DatetimeIndex:
+    ...
+
+
+@overload
+def gps_format_to_datetime(wn: int, tow: float) -> pd.Timestamp:
+    ...
 
 
 def gps_format_to_datetime(wn, tow):
@@ -38,7 +67,17 @@ def gps_format_to_datetime(wn, tow):
     """
     seconds = pd.to_timedelta(tow, "s")
     weeks = pd.to_timedelta(np.array(wn) * WEEK_SECS, "s")
-    return GPS_WEEK_0 + weeks + seconds
+    return GPS_WEEK_0 + weeks + seconds  # type: ignore
+
+
+@overload
+def datetime_to_gps_format(t: DatetimeArray) -> WnTowArray:
+    ...
+
+
+@overload
+def datetime_to_gps_format(t: DatetimeScalar) -> WnTow:
+    ...
 
 
 def datetime_to_gps_format(t):
@@ -69,6 +108,16 @@ def datetime_to_gps_format(t):
     delta -= pd.to_timedelta(wn * WEEK_SECS, "s")
     seconds = delta.total_seconds()
     return {"wn": wn, "tow": seconds}
+
+
+@overload
+def gps_minus_utc_seconds(t: DatetimeArray) -> NDArray[np.int_]:
+    ...
+
+
+@overload
+def gps_minus_utc_seconds(t: DatetimeScalar) -> int:
+    ...
 
 
 def gps_minus_utc_seconds(gpst):
@@ -106,6 +155,16 @@ def gps_minus_utc_seconds(gpst):
     return delta_utc
 
 
+@overload
+def gpst_to_utc(gpst: Union[WnTowArray, DatetimeArray]) -> pd.DatetimeIndex:
+    ...
+
+
+@overload
+def gpst_to_utc(gpst: Union[WnTow, DatetimeScalar]) -> pd.Timestamp:
+    ...
+
+
 def gpst_to_utc(gpst):
     """
     Convert a GPS time either in datetime or week number, time of week
@@ -139,6 +198,16 @@ def gpst_to_utc(gpst):
 
     # now subtract out the delta_utc value (which is given in float seconds)
     return gpst - (delta_utc * 1e9).astype("timedelta64[ns]")
+
+
+@overload
+def utc_to_gpst(utc: DatetimeArray) -> WnTowArray:
+    ...
+
+
+@overload
+def utc_to_gpst(utc: DatetimeScalar) -> WnTow:
+    ...
 
 
 def utc_to_gpst(utc):
