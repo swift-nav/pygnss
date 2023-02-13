@@ -74,7 +74,10 @@ def test_tow_datetime_roundtrip(t):
     ],
 )
 def test_gps_minus_utc_seconds(utc, dt):
-    np.testing.assert_array_equal(gps_time.gps_minus_utc_seconds(utc), dt)
+    if isinstance(dt, np.ndarray):
+        np.testing.assert_array_equal(gps_time.gps_minus_utc_seconds(utc), dt)
+    else:
+        assert dt == gps_time.gps_minus_utc_seconds(utc)
 
 
 @pytest.fixture(

@@ -93,12 +93,8 @@ def gps_minus_utc_seconds(gpst):
     utc : int
       Returns the number (or an array of them) of leap second values.
     """
-    if isinstance(gpst, (np.ndarray, pd.DatetimeIndex)):
-        delta_utc = np.zeros(gpst.shape, int)
-    else:
-        delta_utc = np.array([], dtype=int)
 
-    delta_utc = np.array(delta_utc)
+    delta_utc = np.zeros_like(gpst, int)
     assert np.all(gpst >= np.datetime64("1999-01-01T00:00:13"))
     # difference was 16 seconds on 1st July 2012, add the leap seconds since that
     delta_utc += 13
@@ -107,7 +103,7 @@ def gps_minus_utc_seconds(gpst):
     delta_utc[gpst >= np.datetime64("2012-07-01T00:00:15")] += 1
     delta_utc[gpst >= np.datetime64("2015-07-01T00:00:16")] += 1
     delta_utc[gpst >= np.datetime64("2017-01-01T00:00:17")] += 1
-    return delta_utc.item() if delta_utc.size == 1 else delta_utc
+    return delta_utc
 
 
 def gpst_to_utc(gpst):
