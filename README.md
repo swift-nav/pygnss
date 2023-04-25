@@ -21,6 +21,38 @@ Currently, `pygnss` provides functions for the following coordinate transformati
 * `ned_from_ecef`
 * `azimuth_elevation_from_ecef`
 
+## Publishing to PyPI
+
+Tag a release:
+
+```
+git tag v0.5.2
+```
+
+Install pre-requisite Python libraries:
+
+```
+python -m pip install –-user –-upgrade setuptools wheel
+```
+
+Build wheel and source dist:
+
+```
+python setup.py sdist bdist_wheel
+```
+
+Export credentials for PyPI:
+
+```
+export TWINE_USERNAME=... TWINE_PASSWORD=...
+```
+
+Use `twine` (install with `sudo apt install twine`) to publish:
+
+```
+twine upload dist/*
+```
+
 ## License
 
 Copyright (C) 2017 Swift Navigation Inc.
