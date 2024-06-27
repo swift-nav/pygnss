@@ -63,7 +63,7 @@ def llh_from_ecef(ecef: ArrayLike) -> Coordinate:
     p = np.linalg.norm((x, y))
 
     # Compute longitude first, this can be done exactly.
-    if p == 0.0:
+    if np.allclose(p, 0.0):
         lon = np.zeros(np.array(x).shape, float)
     else:
         lon = np.arctan2(y, x)
