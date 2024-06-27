@@ -5,12 +5,13 @@
 
 
 from typing import List, Tuple, Union
+
 import numpy as np
 import numpy.typing as npt
 
 ArrayLike = Union[List, Tuple, np.ndarray]
 Coordinate = Tuple[
-    npt.NDArray[np.float_], npt.NDArray[np.float_], npt.NDArray[np.float_]
+    npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]
 ]
 
 WGS84_A: float = 6378137.0
@@ -178,7 +179,7 @@ def ecef_from_llh(llh: ArrayLike) -> Coordinate:
     return x, y, z
 
 
-def ecef_to_ned_matrix(ref_ecef: ArrayLike) -> npt.NDArray[np.float_]:
+def ecef_to_ned_matrix(ref_ecef: ArrayLike) -> npt.NDArray[np.float64]:
     """Populates a provided 3x3 matrix with the appropriate rotation
     matrix to transform from ECEF to NED coordinates, given the
     provided ECEF reference vector.
@@ -209,14 +210,14 @@ def ecef_to_ned_matrix(ref_ecef: ArrayLike) -> npt.NDArray[np.float_]:
 
 def ned_from_ecef(
     ecef_vector: ArrayLike, reference_location: ArrayLike
-) -> npt.NDArray[np.float_]:
+) -> npt.NDArray[np.float64]:
     """Convert ECEF coordinates into NED frame of given reference."""
     return np.dot(ecef_to_ned_matrix(reference_location), ecef_vector)
 
 
 def relative_position_in_ned(
     ecef_target: ArrayLike, ecef_reference: ArrayLike
-) -> npt.NDArray[np.float_]:
+) -> npt.NDArray[np.float64]:
     """Returns the vector between two ECEF points in the NED frame of the
     reference.
 
@@ -244,7 +245,7 @@ def relative_position_in_ned(
 
 def azimuth_elevation_from_ecef(
     ecef_target: ArrayLike, ecef_reference: ArrayLike
-) -> Tuple[npt.NDArray[np.float_], npt.NDArray[np.float_]]:
+) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
     """Returns the azimuth and elevation of a vector pointing from `ref_position`
     to `position` where both are given in ECEF
 
