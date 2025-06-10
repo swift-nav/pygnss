@@ -34,8 +34,7 @@ LEAP_SECOND_DATES = [
 
 
 def gps_format_to_datetime(wn, tow):
-    """
-    Converts a time using week number and time of week representation
+    """Converts a time using week number and time of week representation
     into a python datetime object.  Note that this does NOT convert
     into UTC.  The resulting datetime object is still in GPS time
     and will have been rounded to nanosecond precision (which is
@@ -43,7 +42,7 @@ def gps_format_to_datetime(wn, tow):
     flight).
 
     Parameters
-    -----------
+    ----------
     wn : int
       An integer (or array) corresponding to the week number of a time.
     tow : float
@@ -57,6 +56,7 @@ def gps_format_to_datetime(wn, tow):
       the UTC representation of the corresponding gpst.
 
     See also: gpst_to_utc
+
     """
     seconds = pd.to_timedelta(tow, "s")
     weeks = pd.to_timedelta(np.array(wn) * WEEK_SECS, "s")
@@ -64,8 +64,7 @@ def gps_format_to_datetime(wn, tow):
 
 
 def datetime_to_gps_format(t):
-    """
-    Converts from a datetime to week number and time of week format.
+    """Converts from a datetime to week number and time of week format.
     NOTE: This does NOT convert between utc and gps time.  The result
     will still be in gps time (so will be off by some number of
     leap seconds).
@@ -78,10 +77,11 @@ def datetime_to_gps_format(t):
       for more details).
 
     Returns
-    --------
+    -------
     wn_tow : dict
       Dictionary with attributes 'wn' and 'tow' corresponding to the
       week number and time of week.
+
     """
     t = pd.to_datetime(t)
     delta = t - GPS_WEEK_0
@@ -94,8 +94,7 @@ def datetime_to_gps_format(t):
 
 
 def gps_minus_utc_seconds(gpst):
-    """
-    Returns current number of leap seconds between GPS time and UTC time.
+    """Returns current number of leap seconds between GPS time and UTC time.
 
     UTC leap second is added between 23:59:59 and 00:00:00 in UTC time.
     This function's input is gps time so the time offset changes e.g.
@@ -112,8 +111,8 @@ def gps_minus_utc_seconds(gpst):
     -------
     utc : int
       Returns the number (or an array of them) of leap second values.
-    """
 
+    """
     delta_utc = np.zeros_like(gpst, int)
     if isinstance(gpst, datetime):
         gpst = np.datetime64(gpst)
@@ -124,10 +123,9 @@ def gps_minus_utc_seconds(gpst):
     return delta_utc
 
 
-def gpst_to_utc(gpst):
-    """
-    Convert a GPS time either in datetime or week number, time of week
-    format into UTC.
+def gpst_to_utc(gpst: dict | datetime) -> datetime:
+    """Convert a GPS time either in datetime or week number, time of week format into UTC.
+
     Use leap second correction from hard-coded look-up table.
 
     Note that the output is incorrect during the leap second because of
@@ -135,7 +133,7 @@ def gpst_to_utc(gpst):
     e.g. instead of 2015-06-30T23:59:60Z it returns 2015-07-01T00:00:00Z
 
     Parameters
-    -----------
+    ----------
     gpst : dict-like (or datetime64)
       A dictionary like that has attributes 'wn' and 'tow' which
       correspond to week number and time of week (in seconds) from
@@ -160,9 +158,7 @@ def gpst_to_utc(gpst):
 
 
 def utc_to_gpst(utc):
-    """
-    Converts from times in utc to the corresponding gps time in
-    week number, time of week format.
+    """Convert from times in utc to the corresponding gps time in week number, time of week format.
 
     Note that the input datetime64 cannot represent the leap second value
     e.g. 2015-06-30T23:59:60Z
@@ -182,6 +178,7 @@ def utc_to_gpst(utc):
       week number and time of week that correspond to the input utc times.
 
     See also: gpst_to_utc
+
     """
     # GPS-UTC offset is defined in GPS time, so some iteration is needed
 

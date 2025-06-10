@@ -1,11 +1,9 @@
-import pytest
-import numpy as np
+from functools import partial
 
 import hypothesis.strategies as st
-
-from pytest import approx
+import numpy as np
+import pytest
 from hypothesis import given
-from functools import partial
 
 import gnss.coord_system as cs
 
@@ -29,8 +27,8 @@ test_data = [
     ((38, 122, 0), (-2666781.2433701, 4267742.1051642, 3905443.968419)),
 ]
 
-approx_dist = partial(approx, abs=1e-6)
-approx_deg = partial(approx, abs=np.deg2rad(1e-7 / 3600))
+approx_dist = partial(pytest.approx, abs=1e-6)
+approx_deg = partial(pytest.approx, abs=np.deg2rad(1e-7 / 3600))
 
 
 def llh_isclose(a, b):
@@ -94,7 +92,7 @@ def test_ned_from_ecef(vector, reference, expected):
 
 
 @pytest.mark.parametrize(
-    "target,reference,expected",
+    ("target", "reference", "expected"),
     # Here we place a target directly above the reference in
     # which case the elevation should be 90
     [

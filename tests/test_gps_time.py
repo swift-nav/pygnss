@@ -9,10 +9,11 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
-import pytest
 import datetime
+
 import numpy as np
 import pandas as pd
+import pytest
 
 from gnss import gps_time
 
@@ -37,9 +38,7 @@ def assert_time_not_equal(x, y):
         datetime.datetime(2000, 1, 1),
         datetime.datetime(2016, 1, 20),
         gps_time.GPS_WEEK_0,
-        pd.date_range(
-            start=datetime.datetime(2016, 1, 1), end=datetime.datetime(2016, 1, 20)
-        ),
+        pd.date_range(start=datetime.datetime(2016, 1, 1), end=datetime.datetime(2016, 1, 20)),
         np.datetime64("2016-01-20T05:00:00.999999"),
         pd.Timestamp("2016-01-20T05:00:00.999999"),
     ],

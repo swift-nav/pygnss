@@ -10,9 +10,7 @@ import numpy as np
 import numpy.typing as npt
 
 ArrayLike = Union[List, Tuple, np.ndarray]
-Coordinate = Tuple[
-    npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]
-]
+Coordinate = Tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]
 
 WGS84_A: float = 6378137.0
 WGS84_IF: float = 298.257223563
@@ -38,8 +36,8 @@ def llh_from_ecef(ecef: ArrayLike) -> Coordinate:
     -------
     llh : array_like length 3
         (Latitude(Degrees), Longitude(Degrees), Height(m))
-    """
 
+    """
     # Conversion from Cartesian to geodetic coordinates is a much harder
     # problem than conversion from geodetic to Cartesian. There is no
     # satisfactory closed form solution but many different iterative approaches
@@ -134,15 +132,12 @@ def llh_from_ecef(ecef: ArrayLike) -> Coordinate:
         # Check for convergence and exit early if we have converged.
         if np.fabs(S - prev_S) < 1e-16 and np.fabs(C - prev_C) < 1e-16:
             break
-        else:
-            prev_S = S
-            prev_C = C
+        prev_S = S
+        prev_C = C
 
     A_n = np.sqrt(S * S + C * C)
     lat = np.copysign(1.0, ecef[2]) * np.arctan(S / (e_c * C))
-    alt = (p * e_c * C + np.fabs(ecef[2]) * S - WGS84_A * e_c * A_n) / np.sqrt(
-        e_c * e_c * C * C + S * S
-    )
+    alt = (p * e_c * C + np.fabs(ecef[2]) * S - WGS84_A * e_c * A_n) / np.sqrt(e_c * e_c * C * C + S * S)
 
     return np.rad2deg(lat), np.rad2deg(lon), alt
 
@@ -163,8 +158,8 @@ def ecef_from_llh(llh: ArrayLike) -> Coordinate:
     -------
     ecef : array_like length 3
         Coordinates in ECEF
-    """
 
+    """
     lat, lon, alt = llh
     lat = np.deg2rad(lat)
     lon = np.deg2rad(lon)
@@ -208,16 +203,12 @@ def ecef_to_ned_matrix(ref_ecef: ArrayLike) -> npt.NDArray[np.float64]:
     return M
 
 
-def ned_from_ecef(
-    ecef_vector: ArrayLike, reference_location: ArrayLike
-) -> npt.NDArray[np.float64]:
+def ned_from_ecef(ecef_vector: ArrayLike, reference_location: ArrayLike) -> npt.NDArray[np.float64]:
     """Convert ECEF coordinates into NED frame of given reference."""
     return np.dot(ecef_to_ned_matrix(reference_location), ecef_vector)
 
 
-def relative_position_in_ned(
-    ecef_target: ArrayLike, ecef_reference: ArrayLike
-) -> npt.NDArray[np.float64]:
+def relative_position_in_ned(ecef_target: ArrayLike, ecef_reference: ArrayLike) -> npt.NDArray[np.float64]:
     """Returns the vector between two ECEF points in the NED frame of the
     reference.
 
@@ -235,19 +226,17 @@ def relative_position_in_ned(
     ned : array-like
         A length three vector which points from reference to target in the
         north/east/down reference frame centered at the reference position.
+
     """
     ecef_target = np.asarray(ecef_target)
     ecef_reference = np.asarray(ecef_reference)
-    return ned_from_ecef(
-        np.transpose(np.transpose(ecef_target) - ecef_reference), ecef_reference
-    )
+    return ned_from_ecef(np.transpose(np.transpose(ecef_target) - ecef_reference), ecef_reference)
 
 
 def azimuth_elevation_from_ecef(
     ecef_target: ArrayLike, ecef_reference: ArrayLike
 ) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
-    """Returns the azimuth and elevation of a vector pointing from `ref_position`
-    to `position` where both are given in ECEF
+    """Return the azimuth and elevation of a vector pointing from `ref_position` to `position` where both are given in ECEF.
 
     Parameters
     ----------
@@ -267,6 +256,7 @@ def azimuth_elevation_from_ecef(
     elevation : float
         The elevation angle, or the angle between the horizon at the `reference
         position` and the object at `position` (degrees)
+
     """
     ecef_target = np.asarray(ecef_target)
     ecef_reference = np.asarray(ecef_reference)

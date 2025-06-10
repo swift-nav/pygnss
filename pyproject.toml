@@ -1,0 +1,80 @@
+[project]
+name = "pygnss"
+version = "0.1.0"
+description = "GNSS Utilities"
+readme = "README.md"
+requires-python = ">=3.7,<4"
+dependencies = ["numpy>=1.21", "pandas>=1.0"]
+classifiers=[
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+
+[dependency-groups]
+dev = [
+    "coverage>=7.2.7",
+    "hypothesis>=6.79.4",
+    "mypy>=1.4.1",
+    "pandas-stubs>=1.2.0.62",
+    "pytest>=7.4.4",
+    "pytest-mypy>=0.10.3",
+    "ruff>=0.11.13",
+]
+
+[tool.hatch]
+metadata = {license = {file = "LICENSE"}}
+[tool.hatch.build.targets.wheel]
+universal = true
+
+[tool.ruff]
+# Don't include src/integrity_performance/ in the ruff analysis
+include = [
+  "gnss/**/*.py",
+  "tests/**/*.py",
+  "benchmarks/",
+]
+namespace-packages = ["gnss"]
+
+lint.extend-select = ["ALL"]
+lint.ignore = [
+  "ANN205", # Don't annotate return type of staticmethods
+  "ANN401", # Allow Any type
+  "TC001",  # Don't force typing import block TODO(armallen): Remove this
+  "G004",   # Allow f-strings in logging calls
+  "D100",   # Allow missing module docstrings
+  "D101",   # Allow missing class docstrings
+  "D102",   # Allow missing method docstrings
+  "D103",   # Allow missing function docstrings
+  "D104",   # Allow missing docstrings in public package
+  "D105",   # Allow missing docstrings in magic methods
+  "D107",   # Allow missing __init__ docstrings
+  "D203",   # Conflict with D212
+  "D213",   # Conflict with D212
+  "S101",   # Allow asserts
+  "PGH003", # Allow type: ignore 
+  "FA102",  # Allow using PEP604 union X | Y without importing __future__.annotations
+  "TD003",  # Allow undocummented TODO links
+  "FIX002", # Allow documented TODOs
+  "FIX001", # Allow documented FIXMEs
+  "PD101",  # Allow uses of nunique
+  "TRY003", # Allow long messages in exceptions
+  "RUF012", # We are using pydantic, so we don't need to use TypeVar for class attributes
+  "PT011",  # Allow testing exceptions without matching exception string,
+  "INP001", # Allow missing __init__.py file in tests subdirs
+  "S607",   # Allow using partial path for commands in subprocess
+  "S603",   # Allow using shell=False check=True in subprocess
+  "S506",   # Allow unsafe yaml loader
+  "COM812", # Allow missing trailing commas, is fixed by formatter, see "Formatter compatibility" in https://docs.astral.sh/ruff/rules/missing-trailing-comma/#missing-trailing-comma-com812
+  # The following is also recommended by ruff, but it's not covered by the formatter,
+  # so we'll keep the rule active until we see a linter/formatter conflict
+  "ISC001", # Allow string concatenation on a single line, can cause conflicts with the formatter
+]
+lint.mccabe.max-complexity = 18
+lint.pylint.max-args = 6
+lint.pylint.max-branches = 20
+lint.pylint.max-statements = 80
+line-length = 120

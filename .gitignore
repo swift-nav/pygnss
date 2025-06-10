@@ -102,3 +102,4 @@ ENV/
 .asv/
 
 .vscode/
+test-results.xml
