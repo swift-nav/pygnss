@@ -6,11 +6,53 @@
 
 ## Installation
 
-It is recommended to install `pygnss` in a virtualenv to avoid polluting global system state.
+It is recommended to install `pygnss` in a virtual environment to avoid polluting global system state.
 
-To install the latest version of `pygnss` from git:
+To install the latest version of `pygnss` from PyPI:
 
-`$ pip install 'git+https://github.com/swift-nav/pygnss.git'`
+```bash
+pip install swiftnav-gnss
+```
+
+To install from git:
+
+```bash
+pip install 'git+https://github.com/swift-nav/pygnss.git'
+```
+
+## Development Setup
+
+This project uses [uv](https://docs.astral.sh/uv/) for fast, reliable Python package management and [ruff](https://docs.astral.sh/ruff/) for linting and formatting.
+
+Install uv:
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+Clone and set up the development environment:
+
+```bash
+git clone https://github.com/swift-nav/pygnss.git
+cd pygnss
+uv pip install -e ".[dev]"
+```
+
+Run tests and checks:
+
+```bash
+# Run tests
+pytest
+
+# Lint code
+ruff check .
+
+# Format code
+ruff format .
+
+# Type check
+mypy gnss/ tests/
+```
 
 ## Usage
 
@@ -25,31 +67,28 @@ Currently, `pygnss` provides functions for the following coordinate transformati
 
 Tag a release:
 
-```
+```bash
 git tag v0.5.2
+git push origin v0.5.2
 ```
 
-Install pre-requisite Python libraries:
+Build the package:
 
-```
-python -m pip install –-user –-upgrade setuptools wheel
-```
-
-Build wheel and source dist:
-
-```
-python setup.py sdist bdist_wheel
+```bash
+uv build
 ```
 
-Export credentials for PyPI:
+This creates wheel and source distributions in the `dist/` directory.
 
-```
-export TWINE_USERNAME=... TWINE_PASSWORD=...
-```
+Publish to PyPI using `uv publish` or `twine`:
 
-Use `twine` (install with `sudo apt install twine`) to publish:
+```bash
+# Using uv (recommended)
+uv publish
 
-```
+# Or using twine
+export TWINE_USERNAME=__token__
+export TWINE_PASSWORD=<your-pypi-token>
 twine upload dist/*
 ```
 

@@ -4,13 +4,13 @@
 # be be distributed together with this source. All other rights reserved.
 
 
-from typing import List, Tuple, Union
+from typing import Union
 
 import numpy as np
 import numpy.typing as npt
 
-ArrayLike = Union[List, Tuple, np.ndarray]
-Coordinate = Tuple[
+ArrayLike = Union[list, tuple, np.ndarray]
+Coordinate = tuple[
     npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]
 ]
 
@@ -91,7 +91,7 @@ def llh_from_ecef(ecef: ArrayLike) -> Coordinate:
 
     # Iterate a maximum of 10 times. This should be way more than enough for
     # all sane inputs
-    for i in range(10):
+    for _i in range(10):
         # Calculate some intermmediate variables used in the update step based
         # on the current state.
         A_n = np.sqrt(S * S + C * C)
@@ -212,7 +212,7 @@ def ned_from_ecef(
     ecef_vector: ArrayLike, reference_location: ArrayLike
 ) -> npt.NDArray[np.float64]:
     """Convert ECEF coordinates into NED frame of given reference."""
-    return np.dot(ecef_to_ned_matrix(reference_location), ecef_vector)
+    return np.dot(ecef_to_ned_matrix(reference_location), ecef_vector)  # type: ignore[no-any-return]
 
 
 def relative_position_in_ned(
@@ -245,7 +245,7 @@ def relative_position_in_ned(
 
 def azimuth_elevation_from_ecef(
     ecef_target: ArrayLike, ecef_reference: ArrayLike
-) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
     """Returns the azimuth and elevation of a vector pointing from `ref_position`
     to `position` where both are given in ECEF
 

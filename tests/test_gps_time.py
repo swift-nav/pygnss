@@ -9,10 +9,11 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
-import pytest
 import datetime
+
 import numpy as np
 import pandas as pd
+import pytest
 
 from gnss import gps_time
 
@@ -26,7 +27,7 @@ def assert_time_equal(x, y):
 def assert_time_not_equal(x, y):
     try:
         assert_time_equal(x, y)
-        assert False
+        raise AssertionError()
     except AssertionError:
         pass
 

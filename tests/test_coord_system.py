@@ -1,11 +1,10 @@
-import pytest
-import numpy as np
+from functools import partial
 
 import hypothesis.strategies as st
-
-from pytest import approx
+import numpy as np
+import pytest
 from hypothesis import given
-from functools import partial
+from pytest import approx
 
 import gnss.coord_system as cs
 
