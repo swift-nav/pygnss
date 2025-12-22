@@ -98,6 +98,13 @@ ENV/
 # mypy
 .mypy_cache/
 
+# ruff
+.ruff_cache/
+
+# uv
+.uv/
+uv.lock
+
 # airspeed velocity
 .asv/
 

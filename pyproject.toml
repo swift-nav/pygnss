@@ -1,0 +1,122 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "swiftnav-gnss"
+description = "GNSS Utilities"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+    {name = "Swift Navigation", email = "dev@swiftnav.com"}
+]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dynamic = ["version"]
+dependencies = [
+    "numpy>=1.21",
+    "pandas>=2.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/swift-nav/pygnss"
+Repository = "https://github.com/swift-nav/pygnss"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "hypothesis>=6.0",
+    "mypy>=1.0",
+    "pandas-stubs>=2.0",
+    "ruff>=0.8.0",
+]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=7.0",
+    "hypothesis>=6.0",
+    "mypy>=1.0",
+    "pandas-stubs>=2.0",
+    "ruff>=0.8.0",
+]
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.targets.wheel]
+packages = ["gnss"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/gnss",
+    "/tests",
+    "/benchmarks",
+    "LICENSE",
+    "README.md",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py39"
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort
+    "N",      # pep8-naming
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "SIM",    # flake8-simplify
+    "TCH",    # flake8-type-checking
+    "RUF",    # ruff-specific rules
+]
+ignore = [
+    "E501",   # line too long (handled by formatter)
+    "N806",   # uppercase variable names (used for mathematical constants)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"gnss/__init__.py" = ["F401"]  # Allow unused imports in __init__.py (public API)
+"tests/**/*.py" = ["E741"]     # Allow ambiguous variable names in tests
+
+[tool.ruff.lint.isort]
+known-first-party = ["gnss"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = "_pytest.*"
+ignore_errors = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]

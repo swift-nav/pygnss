@@ -7,18 +7,43 @@ on:
       - 'master'
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+
     steps:
-      - uses: actions/checkout@v2
-      - name: Setup Python
-        uses: actions/setup-python@v2
+      - uses: actions/checkout@v4
         with:
-          python-version: 3.7
-      - name: Install Tox and any other packages
+          fetch-depth: 0  # Required for setuptools_scm
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install tox
-      - name: Run Tox
+          uv pip install --system -e ".[dev]"
+
+      - name: Run ruff linting
         run: |
-          tox
+          ruff check .
+
+      - name: Run ruff formatting check
+        run: |
+          ruff format --check .
+
+      - name: Run mypy
+        run: |
+          mypy gnss/ tests/
+
+      - name: Run tests
+        run: |
+          pytest -v
